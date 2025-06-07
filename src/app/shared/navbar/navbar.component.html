@@ -1,0 +1,29 @@
+<mat-toolbar color="primary" class="px-4">
+  <!-- Clientes -->
+  <button
+    mat-button
+    routerLink="/clientes"
+    routerLinkActive="underline"
+    [routerLinkActiveOptions]="{ exact: true }">
+    Clientes
+  </button>
+
+  <!-- Pedidos -->
+  <button
+    mat-button
+    routerLink="/pedidos"
+    routerLinkActive="underline"
+    [routerLinkActiveOptions]="{ exact: true }">
+    Pedidos
+  </button>
+
+  <!-- Catálogo de Productos -->
+  <button
+    mat-button
+    routerLink="/productos"
+    routerLinkActive="underline"
+    [routerLinkActiveOptions]="{ exact: true }">
+    Catálogo
+  </button>
+   <button mat-button routerLink="/carrito"   routerLinkActive="underline">Carrito</button>
+</mat-toolbar>

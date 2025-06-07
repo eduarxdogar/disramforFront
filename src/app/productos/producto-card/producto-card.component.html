@@ -1,0 +1,15 @@
+<mat-card class="flex flex-col p-4">
+     <img src="assets/{{ producto.codigo }}.jpeg"
+       alt="{{ producto.nombre }}"
+       class="h-32 w-full object-contain mb-4">
+      <h3 class="text-lg font-semibold mb-2">{{ producto.codigo }}</h3>
+      <p class="flex-1 mb-4">{{ producto.nombre }}</p>
+      <div class="flex items-center justify-between">
+        <span class="font-bold">{{ producto.precioUnitario | currency:'COP' }}</span>
+        <button mat-mini-fab
+                color="primary"
+                (click)="addToCart()">
+          <mat-icon>add_shopping_cart</mat-icon>
+        </button>
+      </div>
+    </mat-card>

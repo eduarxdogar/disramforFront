@@ -1,0 +1,72 @@
+<!-- cliente-form.component.html -->
+<div class="p-6 max-w-2xl mx-auto">
+  <mat-card class="rounded-2xl shadow-lg overflow-hidden">
+    <mat-card-header class="bg-indigo-600 text-white p-4">
+      <mat-card-title class="text-xl font-semibold">
+        {{ isEdit ? 'Editar Cliente' : 'Nuevo Cliente' }}
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content class="p-6 space-y-4">
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- NIT -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>NIT</mat-label>
+            <input matInput formControlName="nit" placeholder="Digite NIT">
+            <mat-error *ngIf="form.get('nit')?.hasError('required')">
+              El NIT es obligatorio
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Nombre -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="nombre" placeholder="Razón social o nombre">
+            <mat-error *ngIf="form.get('nombre')?.hasError('required')">
+              El nombre es obligatorio
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Teléfono -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Teléfono</mat-label>
+            <input matInput formControlName="telefono" placeholder="Ej: 3001234567">
+          </mat-form-field>
+
+          <!-- Email -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" placeholder="correo@dominio.com">
+            <mat-error *ngIf="form.get('email')?.hasError('email')">
+              Formato de email inválido
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Ciudad -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Ciudad</mat-label>
+            <input matInput formControlName="ciudad" placeholder="Ciudad">
+          </mat-form-field>
+
+          <!-- Dirección -->
+          <mat-form-field appearance="outline" class="w-full sm:col-span-2">
+            <mat-label>Dirección</mat-label>
+            <input matInput formControlName="direccion" placeholder="Calle 123 #45-67">
+          </mat-form-field>
+        </div>
+
+        <!-- Botones -->
+        <div class="mt-6 flex justify-end gap-3">
+          <button mat-stroked-button color="warn" routerLink="/clientes">
+            Cancelar
+          </button>
+          <button mat-flat-button color="primary" type="submit"
+                  [disabled]="form.invalid">
+            {{ isEdit ? 'Actualizar' : 'Crear' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,46 @@
+<!-- cliente-list.component.html -->
+<div class="p-6 max-w-3xl mx-auto">
+  <mat-card class="rounded-lg shadow-sm p-4">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-semibold">Clientes</h2>
+      <button mat-flat-button color="primary" routerLink="/clientes/new">
+        <mat-icon>add</mat-icon> Nuevo
+      </button>
+    </div>
+
+    <mat-form-field appearance="outline" class="w-full mb-4">
+      <mat-label>Buscar por nombre o NIT</mat-label>
+      <input matInput [(ngModel)]="term" (ngModelChange)="filtrar()" placeholder="Ej: 90123456">
+    </mat-form-field>
+
+    <mat-table [dataSource]="clientesFiltrados" class="w-full">
+      <!-- NIT Column -->
+      <ng-container matColumnDef="nit">
+        <mat-header-cell *matHeaderCellDef> NIT </mat-header-cell>
+        <mat-cell        *matCellDef="let c"> {{c.nit}} </mat-cell>
+      </ng-container>
+
+      <!-- Nombre Column -->
+      <ng-container matColumnDef="nombre">
+        <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
+        <mat-cell        *matCellDef="let c"> {{c.nombre}} </mat-cell>
+      </ng-container>
+
+      <!-- Acciones Column -->
+      <ng-container matColumnDef="acciones">
+        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-cell        *matCellDef="let c">
+          <button mat-icon-button color="accent" [routerLink]="['/clientes/edit', c.id]">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="eliminar(c.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="['nit','nombre','acciones']"></mat-header-row>
+      <mat-row        *matRowDef="let row; columns: ['nit','nombre','acciones']"></mat-row>
+    </mat-table>
+  </mat-card>
+</div>

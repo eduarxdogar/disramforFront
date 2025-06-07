@@ -1,0 +1,25 @@
+<!-- src/app/clientes/cliente-catalogo/cliente-catalogo.component.html -->
+<div class="p-6 max-w-3xl mx-auto space-y-4">
+  <h2 class="text-2xl font-bold">Catálogo de Clientes</h2>
+
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Buscar cliente (NIT o nombre)</mat-label>
+    <input matInput [(ngModel)]="filtro" placeholder="ej. 901234567-8 o Mi Taller" />
+  </mat-form-field>
+
+  <mat-list>
+    <mat-list-item *ngFor="let c of clientesFiltrados()">
+      <mat-card class="w-full p-4 flex justify-between items-center">
+        <div>
+          <h3 class="text-lg font-semibold">{{ c.nombre }}</h3>
+          <p class="text-sm text-gray-600">NIT: {{ c.nit }}</p>
+          <p class="text-sm text-gray-600">{{ c.direccion }}, {{ c.ciudad }}</p>
+          <p class="text-sm text-gray-600">Tel: {{ c.telefono }}</p>
+        </div>
+        <button mat-icon-button color="primary" (click)="seleccionar(c)">
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </mat-card>
+    </mat-list-item>
+  </mat-list>
+</div>
