@@ -34,6 +34,10 @@ export interface PedidoDetallado {
     estado: string;
     total: number;
     items: {
+imagenUrl: any;
+        espacio: string;
+        nivel: string;
+        pasillo: string;
         id: number;
         productoNombre: string;
         precioUnitario: number;

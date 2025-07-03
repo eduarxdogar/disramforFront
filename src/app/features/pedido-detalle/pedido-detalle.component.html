@@ -5,8 +5,11 @@
     </div>
 
     <div *ngIf="!isLoading && pedido">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-slate-800">Detalle del Pedido #{{ pedido.id }}</h1>
+        <div class="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800">Detalle del Pedido #{{ pedido.id }}</h1>
+                <p class="text-slate-500">Realizado el {{ pedido.fecha | date:'fullDate' }} a las {{ pedido.fecha | date:'shortTime' }}</p>
+            </div>
             <button mat-stroked-button routerLink="/pedidos">
                 <mat-icon>arrow_back</mat-icon>
                 Volver a la Lista
@@ -19,7 +22,7 @@
                 <mat-card-header>
                     <mat-card-title>Información del Cliente</mat-card-title>
                 </mat-card-header>
-                <mat-card-content>
+                <mat-card-content class="space-y-2">
                     <p><strong>Nombre:</strong> {{ pedido.clienteNombre }}</p>
                     <p><strong>NIT:</strong> {{ pedido.clienteNit }}</p>
                     <p><strong>Dirección:</strong> {{ pedido.direccionEntrega }}</p>
@@ -30,8 +33,7 @@
                 <mat-card-header>
                     <mat-card-title>Datos del Pedido</mat-card-title>
                 </mat-card-header>
-                <mat-card-content>
-                    <p><strong>Fecha:</strong> {{ pedido.fecha | date:'fullDate' }}</p>
+                <mat-card-content class="space-y-2">
                     <p><strong>Asesor:</strong> {{ pedido.asesor }}</p>
                     <p><strong>Estado:</strong>
                         <span class="font-semibold px-2 py-1 text-sm rounded-full" [ngClass]="{
@@ -52,16 +54,18 @@
             </mat-card-header>
             <mat-card-content>
                 <mat-list>
-                    <!-- CORREGIDO: Iteramos sobre pedido.items -->
                     <div *ngFor="let item of pedido.items">
-                        <mat-list-item>
-                            <!-- CORREGIDO: Usamos las propiedades del DetallePedidoResponseDTO -->
-                            <span matListItemTitle>{{ item.productoNombre }}</span>
-                            <span matListItemLine>Código: {{ item.productoCodigo }}</span>
-                            <span matListItemMeta class="flex items-center gap-4">
+                        <mat-list-item class="h-auto py-2">
+                            <!-- ¡IMAGEN AÑADIDA! -->
+                            <img matListItemAvatar [src]="item.imagenUrl ? 'assets/' + item.imagenUrl : 'assets/nombre.jpeg'" alt="{{ item.productoNombre }}" class="object-contain border rounded-md">
+                            
+                            <div matListItemTitle class="font-semibold">{{ item.productoNombre }}</div>
+                            <div matListItemLine>Código: {{ item.productoCodigo }}</div>
+                            
+                            <div matListItemMeta class="flex items-center gap-6 text-sm">
                                 <span>Cant: {{ item.cantidad }}</span>
                                 <span class="w-28 text-right">{{ item.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
-                            </span>
+                            </div>
                         </mat-list-item>
                         <mat-divider></mat-divider>
                     </div>
@@ -72,11 +76,15 @@
             </mat-card-content>
         </mat-card>
 
-        <!-- Acciones Futuras -->
-        <div class="mt-8 flex justify-end gap-4">
-            <button mat-stroked-button (click)="exportarPDF()">
+        <!-- Acciones -->
+        <div class="mt-8 flex flex-wrap justify-end gap-4">
+            <button mat-stroked-button (click)="exportarPDFCliente()">
                 <mat-icon>picture_as_pdf</mat-icon>
-                Exportar a PDF
+                PDF Cliente
+            </button>
+            <button mat-stroked-button (click)="exportarPDFBodega()">
+                <mat-icon>inventory</mat-icon>
+                PDF Bodega
             </button>
             <button mat-flat-button color="primary" (click)="editarPedido()" [disabled]="pedido.estado !== 'PENDIENTE'">
                 <mat-icon>edit</mat-icon>

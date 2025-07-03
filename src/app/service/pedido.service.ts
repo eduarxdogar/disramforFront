@@ -14,7 +14,7 @@ export class PedidoService {
   constructor(private http: HttpClient) {}
 
 
-  actualizar(id: number, dto: PedidoRequest): Observable<void> {
+  actualizarPedido(id: number, dto: PedidoRequest): Observable<void> {
     return this.http.patch<void>(`${this.base}/${id}`, dto);
   }
   eliminar(id: number): Observable<void> {

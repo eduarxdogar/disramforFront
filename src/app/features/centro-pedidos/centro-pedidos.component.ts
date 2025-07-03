@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 
 // --- Importaciones de Angular Material ---
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -54,8 +55,12 @@ export class CentroPedidosComponent implements OnInit {
   displayedColumns: string[] = ['nombre', 'cantidad', 'precioUnitario', 'total', 'acciones'];
   categorias: Categoria[] = [];
   filterForm: FormGroup;
+  editMode = false;
+  pedidoIdParaEditar: number | null = null;
 
   constructor(
+    private route: ActivatedRoute, 
+    private router: Router,
     private productoService: ProductoService,
     private categoriaService: CategoriaService,
     private pedidoService: PedidoService,
