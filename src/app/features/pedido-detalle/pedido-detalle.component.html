@@ -1,0 +1,87 @@
+<div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div *ngIf="isLoading" class="text-center p-8">
+        <mat-spinner diameter="50" class="mx-auto"></mat-spinner>
+        <p class="mt-4 text-slate-500">Cargando detalles del pedido...</p>
+    </div>
+
+    <div *ngIf="!isLoading && pedido">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-slate-800">Detalle del Pedido #{{ pedido.id }}</h1>
+            <button mat-stroked-button routerLink="/pedidos">
+                <mat-icon>arrow_back</mat-icon>
+                Volver a la Lista
+            </button>
+        </div>
+
+        <!-- Información del Cliente y Pedido -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Información del Cliente</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <p><strong>Nombre:</strong> {{ pedido.clienteNombre }}</p>
+                    <p><strong>NIT:</strong> {{ pedido.clienteNit }}</p>
+                    <p><strong>Dirección:</strong> {{ pedido.direccionEntrega }}</p>
+                    <p><strong>Ciudad:</strong> {{ pedido.ciudadEntrega }}</p>
+                </mat-card-content>
+            </mat-card>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Datos del Pedido</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <p><strong>Fecha:</strong> {{ pedido.fecha | date:'fullDate' }}</p>
+                    <p><strong>Asesor:</strong> {{ pedido.asesor }}</p>
+                    <p><strong>Estado:</strong>
+                        <span class="font-semibold px-2 py-1 text-sm rounded-full" [ngClass]="{
+                            'bg-yellow-100 text-yellow-800': pedido.estado === 'PENDIENTE',
+                            'bg-blue-100 text-blue-800': pedido.estado === 'ENVIADO',
+                            'bg-green-100 text-green-800': pedido.estado === 'ENTREGADO',
+                            'bg-red-100 text-red-800': pedido.estado === 'CANCELADO'
+                        }">{{ pedido.estado }}</span>
+                    </p>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <!-- Lista de Productos -->
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>Artículos del Pedido</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <mat-list>
+                    <!-- CORREGIDO: Iteramos sobre pedido.items -->
+                    <div *ngFor="let item of pedido.items">
+                        <mat-list-item>
+                            <!-- CORREGIDO: Usamos las propiedades del DetallePedidoResponseDTO -->
+                            <span matListItemTitle>{{ item.productoNombre }}</span>
+                            <span matListItemLine>Código: {{ item.productoCodigo }}</span>
+                            <span matListItemMeta class="flex items-center gap-4">
+                                <span>Cant: {{ item.cantidad }}</span>
+                                <span class="w-28 text-right">{{ item.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                            </span>
+                        </mat-list-item>
+                        <mat-divider></mat-divider>
+                    </div>
+                </mat-list>
+                <div class="text-right font-bold text-2xl mt-4 p-4 bg-slate-50 rounded-lg">
+                    Total del Pedido: {{ pedido.total | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Acciones Futuras -->
+        <div class="mt-8 flex justify-end gap-4">
+            <button mat-stroked-button (click)="exportarPDF()">
+                <mat-icon>picture_as_pdf</mat-icon>
+                Exportar a PDF
+            </button>
+            <button mat-flat-button color="primary" (click)="editarPedido()" [disabled]="pedido.estado !== 'PENDIENTE'">
+                <mat-icon>edit</mat-icon>
+                Editar Pedido
+            </button>
+        </div>
+    </div>
+</div>

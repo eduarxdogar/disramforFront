@@ -1,4 +1,14 @@
 <mat-toolbar color="primary" class="px-4">
+
+  <!-- BOTÓN NUEVO Y MEJORADO -->
+  <button
+    mat-raised-button
+    color="accent"
+    routerLink="/nuevo-pedido"
+    class="mr-4">
+    🚀 Nuevo Pedido
+  </button>
+
   <!-- Clientes -->
   <button
     mat-button
@@ -8,22 +18,15 @@
     Clientes
   </button>
 
-  <!-- Pedidos -->
+  <!-- Pedidos (Lista) -->
   <button
     mat-button
     routerLink="/pedidos"
     routerLinkActive="underline"
     [routerLinkActiveOptions]="{ exact: true }">
-    Pedidos
+    Ver Pedidos
   </button>
 
-  <!-- Catálogo de Productos -->
-  <button
-    mat-button
-    routerLink="/productos"
-    routerLinkActive="underline"
-    [routerLinkActiveOptions]="{ exact: true }">
-    Catálogo
-  </button>
-   <button mat-button routerLink="/carrito"   routerLinkActive="underline">Carrito</button>
+
+
 </mat-toolbar>

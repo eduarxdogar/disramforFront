@@ -5,7 +5,6 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { PedidoFormComponent } from './pedidos/pedido-form/pedido-form.component';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 @Component({
   selector: 'app-root',
