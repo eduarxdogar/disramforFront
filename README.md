@@ -81,5 +81,68 @@ Bienvenido al front-end de la aplicación de gestión comercial. Esta interfaz f
 
 ### 📁 Organización por funcionalidad
 La app sigue una estructura **feature-based**, con carpetas como:
+src/app/
+├── clientes/ # Componentes para cliente-list y cliente-form
+├── features/centro-pedidos/ # Componentes relacionados a pedidos
+├── model/ # Interfaces TypeScript para clientes, productos, etc.
+├── service/ # Servicios HTTP que consumen la API REST
+├── shared/ # Navbar y otros componentes comunes
+
+
+### 🧰 Tecnologías clave
+
+- Angular 17+
+- Angular Material
+- Tailwind CSS
+- RxJS
+- TypeScript
+- jsPDF, html2canvas, xlsx, file-saver
+
+---
+
+## 🔗 Documentación Oficial (Muy Importante)
+
+> 📚 La **documentación técnica completa** de este front-end se encuentra publicada en Notion:
+>
+> 👉 [Ver documentación Front-end en Notion](https://www.notion.so/tu-link-notion-front)
+
+Ahí encontrarás:
+
+- Diagramas visuales
+- Explicación de estructura y dependencias
+- Casos de uso y flujos de trabajo
+- Buenas prácticas para nuevos desarrolladores
+
+---
+
+## 🖼️ Capturas del sistema (Pantallazos recomendados)
+
+Asegúrate de agregar imágenes que representen:
+
+- Página principal o dashboard con navegación (`navbar`)
+- Vista de lista de clientes (`cliente-list`)
+- Formulario de cliente (`cliente-form`)
+- Vista de pedidos o productos
+- Ejemplo de exportación a PDF o Excel
+
+Puedes colocarlas así:
+
+```markdown
+### 🧾 Vista de listado de clientes
+
+![Listado de clientes](screenshots/cliente-list.png)
+
+### 📝 Formulario para agregar cliente
+
+![Formulario de cliente](screenshots/cliente-form.png)
+
+
+
+# Instalar dependencias
+npm install
+
+# Ejecutar servidor de desarrollo
+ng serve
+La app se cargará en http://localhost:4200
 
 
