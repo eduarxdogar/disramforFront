@@ -57,3 +57,29 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+
+
+
+
+# 🖥️ Front-end – Sistema de Gestión Comercial (Angular)
+
+Bienvenido al front-end de la aplicación de gestión comercial. Esta interfaz fue desarrollada en **Angular** con enfoque modular, usando **Angular Material**, **Tailwind CSS** y herramientas modernas para generar reportes PDF y Excel, facilitando la gestión de pedidos y clientes en un entorno visual limpio y eficiente.
+
+---
+
+## 📘 ¿Qué hace este módulo?
+
+- 🧾 Visualiza pedidos, clientes y productos de forma estructurada.
+- 🧮 Permite crear, editar y eliminar registros (CRUD).
+- 📊 Exporta reportes en **PDF y Excel** al instante.
+- 📱 Cuenta con diseño responsivo y accesible gracias a Angular Material + Tailwind.
+
+---
+
+## 🧭 Arquitectura del Front-end
+
+### 📁 Organización por funcionalidad
+La app sigue una estructura **feature-based**, con carpetas como:
+
+
