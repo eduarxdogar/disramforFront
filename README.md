@@ -136,7 +136,8 @@ Puedes colocarlas así:
 ```markdown
 ### 🧾 Vista de listado de clientes
 
-![Listado de clientes](src/assets/1.jpg)
+[![Listado de clientes](src/assets/1.jpg)](https://github.com/tu-usuario/tu-repo/blob/master/src/assets/1.jpg?raw=true
+)
 
 ### 📝 Formulario para agregar cliente
 
