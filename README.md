@@ -136,7 +136,7 @@ Puedes colocarlas así:
 ```markdown
 ### 🧾 Vista de listado de clientes
 
-![Listado de clientes](assets/1.jpg)
+![Listado de clientes](src/assets/1.jpg)
 
 ### 📝 Formulario para agregar cliente
 
