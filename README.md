@@ -81,11 +81,17 @@ Bienvenido al front-end de la aplicación de gestión comercial. Esta interfaz f
 
 ### 📁 Organización por funcionalidad
 La app sigue una estructura **feature-based**, con carpetas como:
+
 src/app/
+
 ├── clientes/ # Componentes para cliente-list y cliente-form
+
 ├── features/centro-pedidos/ # Componentes relacionados a pedidos
+
 ├── model/ # Interfaces TypeScript para clientes, productos, etc.
+
 ├── service/ # Servicios HTTP que consumen la API REST
+
 ├── shared/ # Navbar y otros componentes comunes
 
 
@@ -104,7 +110,7 @@ src/app/
 
 > 📚 La **documentación técnica completa** de este front-end se encuentra publicada en Notion:
 >
-> 👉 [Ver documentación Front-end en Notion](https://www.notion.so/tu-link-notion-front)
+> 👉 [Ver documentación Front-end en Notion](https://petalite-pail-bb4.notion.site/Sistema-Degestion-De-pedidos-y-inventarios-Disramfor-1f8d6cfba8ba80e18683f4119d5556ce)
 
 Ahí encontrarás:
 
@@ -130,11 +136,11 @@ Puedes colocarlas así:
 ```markdown
 ### 🧾 Vista de listado de clientes
 
-![Listado de clientes](screenshots/cliente-list.png)
+![Listado de clientes](assets/1.jpg)
 
 ### 📝 Formulario para agregar cliente
 
-![Formulario de cliente](screenshots/cliente-form.png)
+![Formulario de cliente](assets/cliente-form.png)
 
 
 
