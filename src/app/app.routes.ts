@@ -10,32 +10,27 @@ import { PedidoDetalleComponent } from './features/pedido-detalle/pedido-detalle
 
 // --- ¡IMPORTAMOS NUESTRO NUEVO COMPONENTE! ---
 import { CentroPedidosComponent } from './features/centro-pedidos/centro-pedidos.component';
+import { LoginComponent } from './components/auth/login/login.component';
+
 
 
 export const routes: Routes = [
-  // Clientes
-  { path: 'clientes',          component: ClienteListComponent },
-  { path: 'clientes/new',      component: ClienteFormComponent },
+  // Ruta de autenticación
+  { path: 'login', component: LoginComponent },
+
+  // Rutas de Clientes (protegidas en el futuro)
+  { path: 'clientes', component: ClienteListComponent },
+  { path: 'clientes/new', component: ClienteFormComponent },
   { path: 'clientes/edit/:id', component: ClienteFormComponent },
 
+  // Rutas de Pedidos (protegidas en el futuro)
+  { path: 'nuevo-pedido', component: CentroPedidosComponent },
+  { path: 'pedidos', component: PedidoListComponent },
+  { path: 'pedidos/detalle/:id', component: PedidoDetalleComponent },
 
-  
-
-
-
-  // --- ¡NUESTRA RUTA ESTRELLA PARA EL MVP! ---
-  // Reemplaza la antigua ruta 'pedidos/new' por esta, que es mucho más potente.
-  { path: 'nuevo-pedido',      component: CentroPedidosComponent },
-    // --- ¡NUESTRA RUTA ESTRELLA PARA EL MVP! ---
-  { path: 'nuevo-pedido',      component: CentroPedidosComponent },
-
-  // --- ¡AÑADIMOS LA RUTA PARA VER EL HISTORIAL DE PEDIDOS! ---
-  { path: 'pedidos',           component: PedidoListComponent },
-   { path: 'pedidos/detalle/:id', component: PedidoDetalleComponent },
-
-
-  // redirección por defecto a nuestro nuevo componente
-  { path: '**', redirectTo: 'nuevo-pedido' }
+  // Redirección por defecto a la ruta de login
+  // Esto asegura que el usuario vea el login al entrar
+  { path: '**', redirectTo: 'login' }
 ];
 
 export const appRouting = [

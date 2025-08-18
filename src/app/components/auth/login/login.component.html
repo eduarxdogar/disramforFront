@@ -1,0 +1,43 @@
+<!-- Contenedor principal: ocupa toda la pantalla y centra el formulario -->
+<div class="bg-drf-gray min-h-screen flex items-center justify-center p-4 sm:p-6">
+  <!-- Tarjeta de Angular Material para el formulario -->
+  <mat-card class="w-full max-w-md rounded-xl shadow-2xl p-6 sm:p-8 transform transition-all hover:scale-105">
+    <mat-card-header class="text-center justify-center block">
+      <!-- Logo de la empresa. Placeholder para que lo reemplaces con el tuyo. -->
+      <img src="https://placehold.co/150x50/0D47A1/FFFFFF?text=Disramfor" alt="Logo de Disramfor" class="mx-auto mb-4">
+      <mat-card-title class="text-2xl font-bold text-drf-blue">Iniciar Sesión</mat-card-title>
+      <mat-card-subtitle class="text-gray-500 mt-2">
+        Ingresa a tu cuenta para gestionar pedidos y catálogo.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content class="mt-8">
+      <!-- Formulario reactivo de Angular -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Campo de Correo Electrónico -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Correo Electrónico</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="ejemplo@correo.com">
+          <mat-icon matPrefix class="text-gray-400">email</mat-icon>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">El correo es obligatorio</mat-error>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Formato de correo inválido</mat-error>
+        </mat-form-field>
+
+        <!-- Campo de Contraseña -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Contraseña</mat-label>
+          <input matInput formControlName="password" type="password" placeholder="Tu contraseña">
+          <mat-icon matPrefix class="text-gray-400">lock</mat-icon>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">La contraseña es obligatoria</mat-error>
+        </mat-form-field>
+
+        <!-- Botón de Envío -->
+        <button mat-flat-button color="primary" class="w-full h-12 text-lg rounded-xl shadow-lg hover:shadow-xl transition-shadow" [disabled]="loginForm.invalid || loading">
+          <!-- Muestra el spinner de carga si la petición está en curso -->
+          <span *ngIf="!loading">Acceder</span>
+          <mat-spinner *ngIf="loading" color="drf-gold" diameter="24"></mat-spinner>
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
