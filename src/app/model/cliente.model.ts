@@ -13,6 +13,7 @@ export interface Cliente {
 
 // Modelo para creación o actualización (POST/PUT)
 export interface ClienteRequest {
+  id?: number;
   nit?: string;
   nombre?: string;
   direccion?: string;

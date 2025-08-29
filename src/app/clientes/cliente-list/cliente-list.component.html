@@ -1,69 +1,103 @@
-<!-- cliente-list.component.html -->
-<div class="p-6 max-w-3xl mx-auto">
-  <mat-card class="rounded-lg shadow-sm p-4">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-semibold">Clientes</h2>
-      <button mat-flat-button color="primary" routerLink="/clientes/new">
-        <mat-icon>add</mat-icon> Nuevo
-      </button>
-    </div>
+<!--
+  He realizado los siguientes cambios:
+  1. Solucionado el error de tipo en el método `eliminar()` añadiendo el operador de aserción no nula (`!`) a `c.id` y `cliente.id`. Esto le asegura a TypeScript que el valor no será `undefined`.
+-->
+<div class="p-4 md:p-6 max-w-5xl mx-auto">
+  <mat-card class="rounded-lg shadow-sm">
+    <mat-card-content class="p-4">
+      <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+        <h2 class="text-2xl font-semibold text-slate-800">Clientes</h2>
+        <button mat-flat-button color="primary" routerLink="/clientes/new">
+          <mat-icon>add</mat-icon>
+          <span>Nuevo Cliente</span>
+        </button>
+      </div>
 
-    <!-- Filtro de búsqueda que llama a onFiltrar() -->
-    <mat-form-field  class="w-full mb-4">
-      <mat-label>Buscar por nombre o NIT</mat-label>
-      <input matInput [(ngModel)]="term" (ngModelChange)="onFiltrar()" placeholder="Ej: 90123456">
-    </mat-form-field>
+      <!-- Filtro de búsqueda -->
+      <mat-form-field class="w-full mb-4">
+        <mat-label>Buscar por nombre o NIT</mat-label>
+        <input matInput [(ngModel)]="term" (ngModelChange)="onFiltrar()" placeholder="Ej: 90123456 o Nombre Cliente">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
 
-    <!-- Tabla que muestra los clientes filtrados y paginados -->
-    <mat-table [dataSource]="dataSource" class="w-full">
-      <!-- NIT Column -->
-      <ng-container matColumnDef="nit">
-        <mat-header-cell *matHeaderCellDef> NIT </mat-header-cell>
-        <mat-cell *matCellDef="let c"> {{c.nit}} </mat-cell>
-      </ng-container>
+      <!-- Tabla para pantallas medianas y grandes (md y superior) -->
+      <div class="hidden md:block">
+        <table mat-table [dataSource]="dataSource" class="w-full">
+          <!-- Columnas de la tabla... -->
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef> Nombre </th>
+            <td mat-cell *matCellDef="let c"> {{c.nombre}} </td>
+          </ng-container>
 
-      <!-- Nombre Column -->
-      <ng-container matColumnDef="nombre">
-        <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
-        <mat-cell *matCellDef="let c"> {{c.nombre}} </mat-cell>
-      </ng-container>
+          <ng-container matColumnDef="nit">
+            <th mat-header-cell *matHeaderCellDef> NIT </th>
+            <td mat-cell *matCellDef="let c"> {{c.nit}} </td>
+          </ng-container>
+          
+          <ng-container matColumnDef="direccion">
+            <th mat-header-cell *matHeaderCellDef> Dirección </th>
+            <td mat-cell *matCellDef="let c"> {{c.direccion}} </td>
+          </ng-container>
 
-      <!-- Dirección Column -->
-      <ng-container matColumnDef="direccion">
-        <mat-header-cell *matHeaderCellDef> Dirección </mat-header-cell>
-        <mat-cell *matCellDef="let c"> {{c.direccion}} </mat-cell>
-      </ng-container>
+          <ng-container matColumnDef="ciudad">
+            <th mat-header-cell *matHeaderCellDef> Ciudad </th>
+            <td mat-cell *matCellDef="let c"> {{c.ciudad}} </td>
+          </ng-container>
 
-      <!-- Ciudad Column -->
-      <ng-container matColumnDef="ciudad">
-        <mat-header-cell *matHeaderCellDef> Ciudad </mat-header-cell>
-        <mat-cell *matCellDef="let c"> {{c.ciudad}} </mat-cell>
-      </ng-container>
+          <ng-container matColumnDef="telefono">
+            <th mat-header-cell *matHeaderCellDef> Teléfono </th>
+            <td mat-cell *matCellDef="let c"> {{c.telefono}} </td>
+          </ng-container>
 
-      <!-- Teléfono Column -->
-      <ng-container matColumnDef="telefono">
-        <mat-header-cell *matHeaderCellDef> Teléfono </mat-header-cell>
-        <mat-cell *matCellDef="let c"> {{c.telefono}} </mat-cell>
-      </ng-container>
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Acciones</th>
+            <td mat-cell *matCellDef="let c" class="text-right">
+              <button mat-icon-button color="accent" [routerLink]="['/clientes/edit', c.id]" [attr.aria-label]="'Editar cliente ' + c.nombre">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="eliminar(c.id!)" [attr.aria-label]="'Eliminar cliente ' + c.nombre">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
 
-      <!-- Acciones Column -->
-      <ng-container matColumnDef="acciones">
-        <mat-header-cell *matHeaderCellDef></mat-header-cell>
-        <mat-cell *matCellDef="let c">
-          <button mat-icon-button color="accent" [routerLink]="['/clientes/edit', c.id]">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button color="warn" (click)="eliminar(c.id)">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </mat-cell>
-      </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
 
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-    </mat-table>
+      <!-- Lista de tarjetas para pantallas pequeñas (móviles) -->
+      <div class="md:hidden space-y-3">
+        <div *ngFor="let cliente of dataSource.data" class="bg-gray-50 rounded-lg p-4 shadow">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="font-bold text-lg text-slate-800">{{ cliente.nombre }}</p>
+              <p class="text-sm text-slate-600">NIT: {{ cliente.nit }}</p>
+            </div>
+            <div>
+              <button mat-icon-button color="accent" [routerLink]="['/clientes/edit', cliente.id]" [attr.aria-label]="'Editar cliente ' + cliente.nombre">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="eliminar(cliente.id!)" [attr.aria-label]="'Eliminar cliente ' + cliente.nombre">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="mt-2 text-sm text-slate-500">
+            <p>{{ cliente.direccion }}, {{ cliente.ciudad }}</p>
+            <p>Tel: {{ cliente.telefono }}</p>
+          </div>
+        </div>
+      </div>
 
-    <!-- Paginador de Angular Material -->
-    <mat-paginator [length]="totalElements" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100, 2000]" (page)="onPageChange($event)"></mat-paginator>
+      <!-- Paginador -->
+      <mat-paginator [length]="totalElements" 
+                     [pageSize]="pageSize" 
+                     [pageSizeOptions]="[5, 10, 25, 100]" 
+                     (page)="onPageChange($event)"
+                     aria-label="Seleccionar página de clientes">
+      </mat-paginator>
+    </mat-card-content>
   </mat-card>
 </div>
+

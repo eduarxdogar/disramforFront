@@ -37,7 +37,6 @@ import { AuthService } from '../../../service/auth.service';
     RouterLink,
   ],
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
   registerForm: FormGroup;

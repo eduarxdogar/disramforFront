@@ -11,7 +11,7 @@
       <form [formGroup]="form" (ngSubmit)="save()">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <!-- NIT -->
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="fill" class="w-full">
             <mat-label>NIT</mat-label>
             <input matInput formControlName="nit" placeholder="Digite NIT">
             <mat-error *ngIf="form.get('nit')?.hasError('required')">
@@ -20,7 +20,7 @@
           </mat-form-field>
 
           <!-- Nombre -->
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="fill" class="w-full">
             <mat-label>Nombre</mat-label>
             <input matInput formControlName="nombre" placeholder="Razón social o nombre">
             <mat-error *ngIf="form.get('nombre')?.hasError('required')">
@@ -29,13 +29,13 @@
           </mat-form-field>
 
           <!-- Teléfono -->
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="fill" class="w-full">
             <mat-label>Teléfono</mat-label>
             <input matInput formControlName="telefono" placeholder="Ej: 3001234567">
           </mat-form-field>
 
           <!-- Email -->
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="fill" class="w-full">
             <mat-label>Email</mat-label>
             <input matInput formControlName="email" placeholder="correo@dominio.com">
             <mat-error *ngIf="form.get('email')?.hasError('email')">
@@ -44,13 +44,13 @@
           </mat-form-field>
 
           <!-- Ciudad -->
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field appearance="fill" class="w-full">
             <mat-label>Ciudad</mat-label>
             <input matInput formControlName="ciudad" placeholder="Ciudad">
           </mat-form-field>
 
           <!-- Dirección -->
-          <mat-form-field appearance="outline" class="w-full sm:col-span-2">
+          <mat-form-field appearance="fill" class="w-full sm:col-span-2">
             <mat-label>Dirección</mat-label>
             <input matInput formControlName="direccion" placeholder="Calle 123 #45-67">
           </mat-form-field>
@@ -58,7 +58,8 @@
 
         <!-- Botones -->
         <div class="mt-6 flex justify-end gap-3">
-          <button mat-stroked-button color="warn" routerLink="/clientes">
+          <!-- Botón de cancelar corregido: llama a la función `cancel()` y es de tipo `button` -->
+          <button type="button" mat-stroked-button color="warn" (click)="cancel()">
             Cancelar
           </button>
           <button mat-flat-button color="primary" type="submit"
@@ -70,3 +71,4 @@
     </mat-card-content>
   </mat-card>
 </div>
+

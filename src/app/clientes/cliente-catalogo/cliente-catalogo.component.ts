@@ -32,7 +32,7 @@ export class ClienteCatalogoComponent implements OnInit {
   filtro = '';
 
   ngOnInit() {
-    this.svc.getClientes().subscribe(c => this.clientes = c);
+    this.svc.getClientes(0, 100, '').subscribe(page => this.clientes = page.content);
   }
 
   clientesFiltrados(): ClienteRequest[] {
