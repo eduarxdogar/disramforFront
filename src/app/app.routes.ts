@@ -11,12 +11,14 @@ import { PedidoDetalleComponent } from './features/pedido-detalle/pedido-detalle
 // --- ¡IMPORTAMOS NUESTRO NUEVO COMPONENTE! ---
 import { CentroPedidosComponent } from './features/centro-pedidos/centro-pedidos.component';
 import { LoginComponent } from './components/auth/login/login.component';
+import { RegisterComponent } from './components/auth/register/register.component';
 
 
 
 export const routes: Routes = [
   // Ruta de autenticación
   { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
 
   // Rutas de Clientes (protegidas en el futuro)
   { path: 'clientes', component: ClienteListComponent },

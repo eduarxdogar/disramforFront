@@ -1,0 +1,65 @@
+<div class="bg-drf-gray min-h-screen flex items-center justify-center p-4 sm:p-6">
+  <mat-card class="w-full max-w-md rounded-xl shadow-2xl p-6 sm:p-8 transform transition-all hover:scale-105">
+    <mat-card-header class="text-center justify-center block">
+      <img src="https://placehold.co/150x50/0D47A1/FFFFFF?text=Disramfor" alt="Logo de Disramfor" class="mx-auto mb-4">
+      <mat-card-title class="text-2xl font-bold text-drf-blue">Crear Cuenta</mat-card-title>
+      <mat-card-subtitle class="text-gray-500 mt-2">
+        Regístrate para comenzar a usar el sistema.
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content class="mt-8">
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
+
+        <!-- Campo de Nombre de Usuario -->
+        <mat-form-field  class="w-full">
+          <mat-label>Nombre de Usuario</mat-label>
+          <input matInput formControlName="username" type="text" placeholder="Tu nombre de usuario">
+          <mat-icon matPrefix class="text-gray-400">person</mat-icon>
+          <mat-error *ngIf="registerForm.get('username')?.hasError('required')">El nombre es obligatorio</mat-error>
+          <mat-error *ngIf="registerForm.get('username')?.hasError('minlength')">El nombre debe tener al menos 3 caracteres</mat-error>
+        </mat-form-field>
+        
+        <!-- Campo de Correo Electrónico -->
+        <mat-form-field  class="w-full">
+          <mat-label>Correo Electrónico</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="ejemplo@correo.com">
+          <mat-icon matPrefix class="text-gray-400">email</mat-icon>
+          <mat-error *ngIf="registerForm.get('email')?.hasError('required')">El correo es obligatorio</mat-error>
+          <mat-error *ngIf="registerForm.get('email')?.hasError('email')">Formato de correo inválido</mat-error>
+        </mat-form-field>
+
+        <!-- Campo de Contraseña -->
+        <mat-form-field  class="w-full">
+          <mat-label>Contraseña</mat-label>
+          <input matInput formControlName="password" type="password" placeholder="Tu contraseña">
+          <mat-icon matPrefix class="text-gray-400">lock</mat-icon>
+          <mat-error *ngIf="registerForm.get('password')?.hasError('required')">La contraseña es obligatoria</mat-error>
+          <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">La contraseña debe tener al menos 6 caracteres</mat-error>
+        </mat-form-field>
+
+        <!-- Selector de Rol -->
+        <mat-form-field  class="w-full">
+          <mat-label>Rol</mat-label>
+          <mat-select formControlName="rol">
+            <mat-option *ngFor="let rol of roles" [value]="rol">
+              {{ rol }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        
+        <!-- Botón de Envío -->
+        <button mat-flat-button color="primary" class="w-full h-12 text-lg rounded-xl shadow-lg hover:shadow-xl transition-shadow" [disabled]="registerForm.invalid || loading">
+          <span *ngIf="!loading">Registrarse</span>
+          <mat-spinner *ngIf="loading" color="drf-gold" diameter="24"></mat-spinner>
+        </button>
+      </form>
+    </mat-card-content>
+    
+    <mat-card-actions class="flex justify-center text-center">
+      <a routerLink="/login" class="text-sm text-drf-blue hover:underline">
+        ¿Ya tienes una cuenta? Inicia sesión aquí.
+      </a>
+    </mat-card-actions>
+  </mat-card>
+</div>

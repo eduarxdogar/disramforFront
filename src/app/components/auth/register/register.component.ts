@@ -11,15 +11,17 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 
-// Importamos la interfaz de autenticación
-import { AuthenticationRequest } from '../../../model/authentication-request.model';
+// Importamos la interfaz y el enum que creamos
+import { RegistroRequest } from '../../../model/registrorequest.model';
+import { Rol } from '../../../model/rol.model';
 
 // Importa el servicio de autenticación
 import { AuthService } from '../../../service/auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   standalone: true,
   imports: [
     CommonModule,
@@ -31,14 +33,17 @@ import { AuthService } from '../../../service/auth.service';
     MatIconModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
-    RouterLink
+    MatSelectModule,
+    RouterLink,
   ],
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.css']
 })
-export class LoginComponent implements OnInit {
-  loginForm: FormGroup;
+export class RegisterComponent implements OnInit {
+  registerForm: FormGroup;
   loading = false;
+  // El listado de roles ahora viene directamente del enum para evitar errores
+  roles = Object.values(Rol);
 
   constructor(
     private fb: FormBuilder,
@@ -46,36 +51,34 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private snackBar: MatSnackBar
   ) {
-    this.loginForm = this.fb.group({
+    this.registerForm = this.fb.group({
+      username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      rol: ['', [Validators.required]]
     });
   }
 
-  ngOnInit(): void {
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/nuevo-pedido']);
-    }
-  }
+  ngOnInit(): void {}
 
   onSubmit(): void {
-    if (this.loginForm.invalid) {
-      this.snackBar.open('Por favor, ingresa un correo y contraseña válidos.', 'Cerrar', { duration: 3000 });
+    if (this.registerForm.invalid) {
+      this.snackBar.open('Por favor, completa todos los campos correctamente.', 'Cerrar', { duration: 3000 });
       return;
     }
 
     this.loading = true;
-    const credentials: AuthenticationRequest = this.loginForm.value;
-    this.authService.login(credentials).subscribe({
+    const userData: RegistroRequest = this.registerForm.value;
+    this.authService.register(userData).subscribe({
       next: (response) => {
         this.loading = false;
-        this.snackBar.open('¡Inicio de sesión exitoso!', 'Cerrar', { duration: 3000 });
-        this.router.navigate(['/nuevo-pedido']);
+        this.snackBar.open('¡Registro exitoso! Ya puedes iniciar sesión.', 'Cerrar', { duration: 3000 });
+        this.router.navigate(['/login']); // <-- Aquí está la redirección clave
       },
       error: (err) => {
         this.loading = false;
-        this.snackBar.open('Credenciales inválidas. Por favor, inténtalo de nuevo.', 'Cerrar', { duration: 3000 });
-        console.error('Error de autenticación', err);
+        this.snackBar.open('Error en el registro. Inténtalo de nuevo.', 'Cerrar', { duration: 3000 });
+        console.error('Error de registro', err);
       }
     });
   }

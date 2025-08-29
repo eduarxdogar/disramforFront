@@ -1,0 +1,9 @@
+
+
+export enum Rol {
+  CLIENTE = 'CLIENTE',
+  SUPERVISOR = 'SUPERVISOR',
+  PIKING = 'PIKING',
+  DESPACHO = 'DESPACHO',
+  ADMIN = 'ADMIN'
+}
