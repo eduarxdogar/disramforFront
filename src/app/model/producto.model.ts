@@ -1,4 +1,4 @@
-// src/app/models/producto.model.ts
+
 
 
 // Define la estructura de un Producto y de una Página de productos

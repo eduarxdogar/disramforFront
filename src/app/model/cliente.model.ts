@@ -1,3 +1,5 @@
+
+
 // Modelo para respuestas del backend (GET)
 export interface Cliente {
   id?: number;
@@ -17,4 +19,13 @@ export interface ClienteRequest {
   ciudad?: string;
   telefono?: string;
   email?: string;
+}
+
+// Modelo de la respuesta paginada del backend
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
 }

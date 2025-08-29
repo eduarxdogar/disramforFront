@@ -8,28 +8,48 @@
       </button>
     </div>
 
-    <mat-form-field appearance="outline" class="w-full mb-4">
+    <!-- Filtro de búsqueda que llama a onFiltrar() -->
+    <mat-form-field  class="w-full mb-4">
       <mat-label>Buscar por nombre o NIT</mat-label>
-      <input matInput [(ngModel)]="term" (ngModelChange)="filtrar()" placeholder="Ej: 90123456">
+      <input matInput [(ngModel)]="term" (ngModelChange)="onFiltrar()" placeholder="Ej: 90123456">
     </mat-form-field>
 
-    <mat-table [dataSource]="clientesFiltrados" class="w-full">
+    <!-- Tabla que muestra los clientes filtrados y paginados -->
+    <mat-table [dataSource]="dataSource" class="w-full">
       <!-- NIT Column -->
       <ng-container matColumnDef="nit">
         <mat-header-cell *matHeaderCellDef> NIT </mat-header-cell>
-        <mat-cell        *matCellDef="let c"> {{c.nit}} </mat-cell>
+        <mat-cell *matCellDef="let c"> {{c.nit}} </mat-cell>
       </ng-container>
 
       <!-- Nombre Column -->
       <ng-container matColumnDef="nombre">
         <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
-        <mat-cell        *matCellDef="let c"> {{c.nombre}} </mat-cell>
+        <mat-cell *matCellDef="let c"> {{c.nombre}} </mat-cell>
+      </ng-container>
+
+      <!-- Dirección Column -->
+      <ng-container matColumnDef="direccion">
+        <mat-header-cell *matHeaderCellDef> Dirección </mat-header-cell>
+        <mat-cell *matCellDef="let c"> {{c.direccion}} </mat-cell>
+      </ng-container>
+
+      <!-- Ciudad Column -->
+      <ng-container matColumnDef="ciudad">
+        <mat-header-cell *matHeaderCellDef> Ciudad </mat-header-cell>
+        <mat-cell *matCellDef="let c"> {{c.ciudad}} </mat-cell>
+      </ng-container>
+
+      <!-- Teléfono Column -->
+      <ng-container matColumnDef="telefono">
+        <mat-header-cell *matHeaderCellDef> Teléfono </mat-header-cell>
+        <mat-cell *matCellDef="let c"> {{c.telefono}} </mat-cell>
       </ng-container>
 
       <!-- Acciones Column -->
       <ng-container matColumnDef="acciones">
         <mat-header-cell *matHeaderCellDef></mat-header-cell>
-        <mat-cell        *matCellDef="let c">
+        <mat-cell *matCellDef="let c">
           <button mat-icon-button color="accent" [routerLink]="['/clientes/edit', c.id]">
             <mat-icon>edit</mat-icon>
           </button>
@@ -39,8 +59,11 @@
         </mat-cell>
       </ng-container>
 
-      <mat-header-row *matHeaderRowDef="['nit','nombre','acciones']"></mat-header-row>
-      <mat-row        *matRowDef="let row; columns: ['nit','nombre','acciones']"></mat-row>
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
     </mat-table>
+
+    <!-- Paginador de Angular Material -->
+    <mat-paginator [length]="totalElements" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25, 100, 2000]" (page)="onPageChange($event)"></mat-paginator>
   </mat-card>
 </div>

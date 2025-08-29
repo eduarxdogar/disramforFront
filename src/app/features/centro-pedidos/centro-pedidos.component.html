@@ -23,7 +23,7 @@
             <!-- NUEVA SECCIÓN: SELECCIÓN DE CLIENTE -->
             <div class="bg-white rounded-lg shadow-sm p-5">
                 <h3 class="text-base font-semibold mb-4">1. SELECCIONAR CLIENTE</h3>
-                <mat-form-field class="w-full" appearance="outline">
+                <mat-form-field class="w-full" >
                     <mat-label>Buscar cliente por NIT o Nombre</mat-label>
                     <input type="text" matInput [formControl]="clienteControl" [matAutocomplete]="autoCliente" [readonly]="!!selectedClient">
                     <mat-autocomplete #autoCliente="matAutocomplete" [displayWith]="displayCliente" (optionSelected)="onClientSelected($event)">
@@ -43,11 +43,11 @@
             <div class="bg-white rounded-lg shadow-sm p-5" [class.opacity-50]="!selectedClient">
                 <h3 class="text-base font-semibold mb-4">2. FILTRAR PRODUCTOS</h3>
                 <fieldset [disabled]="!selectedClient" class="space-y-4" [formGroup]="filterForm">
-                    <mat-form-field appearance="outline" class="w-full">
+                    <mat-form-field  class="w-full">
                         <mat-label>Nombre o Código</mat-label>
                         <input matInput formControlName="termino" placeholder="Ej: Junta Culata o JCY25">
                     </mat-form-field>
-                    <mat-form-field appearance="outline" class="w-full">
+                    <mat-form-field  class="w-full">
                         <mat-label>Categoría</mat-label>
                         <mat-select formControlName="categoriaId">
                             <mat-option [value]="null">Todas las categorías</mat-option>
