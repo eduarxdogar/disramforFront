@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import {  PedidoRequest,PedidoDetallado } from '../model/pedido.model';
 import { PedidoResumen } from '../model/pedido.model';
 import { Page } from '../model/producto.model';
+import { EstadoPedido } from '../model/estado-pedido.model'; 
 
 
 @Injectable({ providedIn: 'root' })
@@ -14,8 +15,8 @@ export class PedidoService {
   constructor(private http: HttpClient) {}
 
 
-  actualizarPedido(id: number, dto: PedidoRequest): Observable<void> {
-    return this.http.patch<void>(`${this.base}/${id}`, dto);
+   actualizarPedido(id: number, pedido: PedidoRequest): Observable<any> {
+    return this.http.put(`${this.base}/${id}`, pedido);
   }
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
@@ -35,6 +36,9 @@ export class PedidoService {
   getPedidoById(id: number): Observable<PedidoDetallado> {
         return this.http.get<PedidoDetallado>(`${this.base}/${id}`);
     }
+      actualizarEstado(id: number, estado: EstadoPedido): Observable<void> {
+    return this.http.patch<void>(`${this.base}/${id}/estado`, { estado });
+  }
 
 }
 
