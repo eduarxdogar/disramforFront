@@ -9,7 +9,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PedidoService } from '../../service/pedido.service';
 import { PedidoDetallado } from '../../model/pedido.model';
-import { Producto } from '../../model/producto.model';
 
 // ¡Importaciones para PDF!
 import jsPDF from 'jspdf';
@@ -25,9 +24,9 @@ import autoTable from 'jspdf-autotable';
   templateUrl: './pedido-detalle.component.html',
 })
 export class PedidoDetalleComponent implements OnInit {
-   imgUrl: string = ''; 
   pedido: PedidoDetallado | null = null;
   isLoading = true;
+  isExportingPdf = false; // Para controlar el estado de carga del botón
 
   constructor(
     private route: ActivatedRoute,
@@ -47,33 +46,109 @@ export class PedidoDetalleComponent implements OnInit {
 
   // --- MÉTODOS PARA EXPORTAR ---
 
-  exportarPDFCliente(): void {
-    if (!this.pedido) return;
-    const doc = new jsPDF();
-    
-    doc.setFontSize(18);
-    doc.text(`Pedido #${this.pedido.id}`, 14, 22);
-    doc.setFontSize(11);
-    doc.text(`Cliente: ${this.pedido.clienteNombre}`, 14, 30);
-    doc.text(`Fecha: ${new Date(this.pedido.fecha).toLocaleDateString()}`, 14, 36);
-
-    autoTable(doc, {
-      startY: 50,
-      head: [['Código', 'Producto', 'Cantidad', 'Precio Unit.', 'Subtotal']],
-      body: this.pedido.items.map(item => [
-        item.productoCodigo,
-        item.productoNombre,
-        item.cantidad,
-        this.formatCurrency(item.precioUnitario),
-        this.formatCurrency(item.subtotal)
-      ]),
+  // Método optimizado para cargar la imagen dinámicamente
+  private async getImageAsBase64(url: string): Promise<string> {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
     });
+  }
 
-    const finalY = (doc as any).lastAutoTable.finalY;
-    doc.setFontSize(14);
-    doc.text(`Total: ${this.formatCurrency(this.pedido.total)}`, 14, finalY + 15);
+  async exportarPDFCliente(): Promise<void> {
+    if (!this.pedido) return;
+    this.isExportingPdf = true;
 
-    doc.save(`pedido_cliente_${this.pedido.id}.pdf`);
+    try {
+      const doc = new jsPDF();
+      const pedido = this.pedido;
+      const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+      const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
+
+      // === ENCABEZADO CON LOGO (CARGADO DINÁMICAMENTE) ===
+      const logoBase64 = await this.getImageAsBase64('assets/disramfor.jpg'); // Usamos la imagen JPG
+      doc.addImage(logoBase64, 'JPEG', 14, 15, 40, 15);
+      
+      // === TÍTULO Y FECHA ===
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Pedido #${pedido.id}`, pageWidth - 14, 22, { align: 'right' });
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Fecha de Emisión: ${new Date(pedido.fecha).toLocaleDateString()}`, pageWidth - 14, 28, { align: 'right' });
+
+      // === INFORMACIÓN EN DOS COLUMNAS ===
+      const col1X = 14;
+      const col2X = 110;
+      let currentY = 50;
+
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Información del Cliente', col1X, currentY);
+      doc.text('Datos del Pedido', col2X, currentY);
+      doc.setLineWidth(0.2);
+      doc.line(14, currentY + 2, pageWidth - 14, currentY + 2);
+      currentY += 8;
+
+      // Contenido de las columnas
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const clienteNombreLines = doc.splitTextToSize(`Nombre: ${pedido.clienteNombre}`, 80);
+      doc.text(clienteNombreLines, col1X, currentY);
+      let clienteBlockHeight = (clienteNombreLines.length * 5) + 10;
+      doc.text(`NIT: ${pedido.clienteNit}`, col1X, currentY + (clienteNombreLines.length * 5));
+      doc.text(`Dirección: ${pedido.direccionEntrega}`, col1X, currentY + (clienteNombreLines.length * 5) + 5);
+      doc.text(`Ciudad: ${pedido.ciudadEntrega}`, col1X, currentY + (clienteNombreLines.length * 5) + 10);
+      doc.text(`Asesor: ${pedido.asesor}`, col2X, currentY);
+      doc.text(`Estado: ${pedido.estado}`, col2X, currentY + 5);
+
+      const tableStartY = currentY + clienteBlockHeight + 5;
+
+      // === TABLA DE ARTÍCULOS ===
+      autoTable(doc, {
+        startY: tableStartY,
+        head: [['Código', 'Producto', 'Cantidad', 'Precio Unit.', 'Subtotal']],
+        body: pedido.items.map(item => [
+          item.productoCodigo, item.productoNombre, item.cantidad,
+          this.formatCurrency(item.precioUnitario), this.formatCurrency(item.subtotal)
+        ]),
+      });
+
+      let finalY = (doc as any).lastAutoTable.finalY + 10;
+
+      // === SECCIÓN DE TOTALES ===
+      doc.setFontSize(11);
+      doc.text('Subtotal:', 140, finalY, { align: 'right' });
+      doc.text(this.formatCurrency(pedido.subtotal), 200, finalY, { align: 'right' });
+      finalY += 7;
+      if (pedido.descuento > 0) {
+        doc.text('Descuento:', 140, finalY, { align: 'right' });
+        doc.text(`-${this.formatCurrency(pedido.descuento)}`, 200, finalY, { align: 'right' });
+        finalY += 7;
+      }
+      doc.text('IVA (19%):', 140, finalY, { align: 'right' });
+      doc.text(this.formatCurrency(pedido.iva), 200, finalY, { align: 'right' });
+      finalY += 7;
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Total:', 140, finalY, { align: 'right' });
+      doc.text(this.formatCurrency(pedido.total), 200, finalY, { align: 'right' });
+      
+      // === PIE DE PÁGINA ===
+      const footerY = pageHeight - 10;
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text('Documento generado por A.S.T. Catalog - DISRAMFOR', pageWidth / 2, footerY, { align: 'center' });
+
+      doc.save(`pedido_cliente_${pedido.id}.pdf`);
+    } catch (error) {
+      console.error("Error al generar el PDF:", error);
+    } finally {
+      this.isExportingPdf = false;
+    }
   }
 
   exportarPDFBodega(): void {
@@ -100,10 +175,8 @@ export class PedidoDetalleComponent implements OnInit {
     doc.save(`orden_bodega_${this.pedido.id}.pdf`);
   }
 
-  // --- LÓGICA PARA EDITAR ---
   editarPedido(): void {
     if (!this.pedido || this.pedido.estado !== 'PENDIENTE') return;
-    // Navegamos al centro de pedidos y pasamos el ID del pedido a editar
     this.router.navigate(['/nuevo-pedido'], { queryParams: { editarId: this.pedido.id } });
   }
 
@@ -111,3 +184,4 @@ export class PedidoDetalleComponent implements OnInit {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
   }
 }
+
