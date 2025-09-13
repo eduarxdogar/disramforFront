@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { ClienteService } from '../../service/cliente.service';
-import { Cliente, ClienteRequest, Page } from '../../model/cliente.model';
+import { Cliente, Page } from '../../model/cliente.model';
 
 @Component({
   selector: 'app-cliente-list',
@@ -48,22 +48,21 @@ export class ClienteListComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    // Al inicio, cargamos la primera página de clientes
     this.cargarClientes();
   }
 
-  // Este método se ejecuta DESPUÉS de que la vista se inicializa
   ngAfterViewInit(): void {
-    // La línea clave para conectar el dataSource con el paginador
     this.dataSource.paginator = this.paginator;
-    this.paginator.page.subscribe((event) => this.onPageChange(event));
   }
 
   cargarClientes(): void {
-    this.clienteService.getClientes(this.pageIndex, this.pageSize, this.term)
+    // --- CORRECCIÓN AQUÍ ---
+    // Cambiamos 'getClientes' por el nuevo método 'listarClientes'
+    this.clienteService.listarClientes(this.pageIndex, this.pageSize, this.term)
       .subscribe((data: Page<Cliente>) => {
         this.dataSource.data = data.content;
         this.totalElements = data.totalElements;
+        this.paginator.length = data.totalElements; // Actualiza el paginador
       });
   }
 

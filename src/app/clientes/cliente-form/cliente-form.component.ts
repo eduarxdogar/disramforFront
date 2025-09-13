@@ -1,17 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ClienteService } from '../../service/cliente.service';
+import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { ClienteRequest } from '../../model/cliente.model';
+import { Observable } from 'rxjs';
 
+// Tus modelos y servicios
+import { Cliente, ClienteRequest } from '../../model/cliente.model';
+import { ClienteService } from '../../service/cliente.service';
+import { AuthService } from '../../service/auth.service';
 
-
+// Angular Material
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
 import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
 
@@ -23,7 +25,6 @@ import { CommonModule } from '@angular/common';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatListModule,
     MatCardModule,
     CommonModule,
     ReactiveFormsModule,
@@ -33,17 +34,18 @@ import { CommonModule } from '@angular/common';
   styleUrl: './cliente-form.component.css'
 })
 export class ClienteFormComponent implements OnInit {
-  form;
+  form: FormGroup;
   isEdit = false;
   clienteId: number | null = null;
+  userRole: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private svc: ClienteService,
+    private authService: AuthService,
     private route: ActivatedRoute,
     private router: Router,
     private snackBar: MatSnackBar,
-
   ){
     this.form = this.fb.group({
       nit: ['', Validators.required],
@@ -54,7 +56,10 @@ export class ClienteFormComponent implements OnInit {
       email: ['', [Validators.email]]
     });
   }
+
   ngOnInit() {
+    this.userRole = this.authService.getUserRole();
+    
     const id = this.route.snapshot.params['id'];
     if (id) {
       this.isEdit = true;
@@ -83,17 +88,40 @@ export class ClienteFormComponent implements OnInit {
   private proceedToSave() {
     const dto = this.form.value;
     const clienteRequest: ClienteRequest = {
-      nit: dto.nit || undefined,
-      nombre: dto.nombre || undefined,
-      direccion: dto.direccion || undefined,
-      ciudad: dto.ciudad || undefined,
-      telefono: dto.telefono || undefined,
-      email: dto.email || undefined,
+      nit: dto.nit,
+      nombre: dto.nombre,
+      direccion: dto.direccion,
+      ciudad: dto.ciudad,
+      telefono: dto.telefono,
+      email: dto.email,
     };
 
-    const operation = this.isEdit && this.clienteId
-      ? this.svc.actualizarCliente(this.clienteId, clienteRequest)
-      : this.svc.agregarCliente(clienteRequest);
+    let operation: Observable<Cliente>;
+
+    if (this.isEdit && this.clienteId) {
+      // --- LÓGICA DE ROLES PARA ACTUALIZAR ---
+      if (this.userRole === 'ASESOR') {
+        console.log(`Rol ASESOR. Actualizando cliente ${this.clienteId} por endpoint de asesor.`);
+        operation = this.svc.actualizarClienteComoAsesor(this.clienteId, clienteRequest);
+      } else {
+        console.log(`Rol ADMIN. Actualizando cliente ${this.clienteId} por endpoint de admin.`);
+        // Para que esto funcione, el admin necesita poder setear el asesorId.
+        // Por ahora, asumimos que no se cambia y lo enviamos si existe.
+        const originalCliente = this.form.getRawValue(); // Podríamos necesitar el asesorId original
+        clienteRequest.asesorId = originalCliente.asesorId;
+        operation = this.svc.actualizarCliente(this.clienteId, clienteRequest);
+      }
+    } else {
+      // Lógica de creación (ya funcional)
+      if (this.userRole === 'ASESOR') {
+        console.log("Rol ASESOR. Creando cliente por endpoint de asesor.");
+        operation = this.svc.agregarClienteComoAsesor(clienteRequest);
+      } else {
+        console.log("Rol ADMIN. Creando cliente por endpoint de admin.");
+        // Aquí se necesitaría un campo en el form para asignar asesorId
+        operation = this.svc.agregarCliente(clienteRequest);
+      }
+    }
 
     operation.subscribe({
       next: () => {
@@ -102,12 +130,14 @@ export class ClienteFormComponent implements OnInit {
         this.router.navigate(['/clientes']);
       },
       error: (err) => {
-        this.snackBar.open('Ocurrió un error al guardar el cliente.', 'Cerrar', { duration: 3000 });
-        console.error(err);
+        const errorMessage = err.error?.message || 'Ocurrió un error al guardar el cliente.';
+        this.snackBar.open(errorMessage, 'Cerrar', { duration: 4000 });
+        console.error('Error al guardar:', err);
       }
     });
   }
-   cancel() {
+
+  cancel() {
     if (this.form.dirty) {
       const snackBarRef = this.snackBar.open('Los cambios no guardados se perderán. ¿Desea continuar?', 'Sí, Cancelar', {
         duration: 5000,
@@ -117,9 +147,7 @@ export class ClienteFormComponent implements OnInit {
         this.router.navigate(['/clientes']);
       });
     } else {
-      // Si no hay cambios, simplemente navega hacia atrás.
       this.router.navigate(['/clientes']);
     }
   }
-
 }

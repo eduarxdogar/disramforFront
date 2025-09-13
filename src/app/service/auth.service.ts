@@ -2,48 +2,67 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { RegistroRequest } from '../../app/model/registrorequest.model'; // Corregida la ruta
+import { RegistroRequest } from '../model/registrorequest.model';
 import { AuthenticationRequest } from '../model/authentication-request.model';
 import { AuthenticationResponse } from '../model/authentication-response.model';
+import { jwtDecode } from 'jwt-decode';
 
-const apiUrl = 'http://localhost:8080/api/auth/'
+const API_URL = 'http://localhost:8080/api/auth';
+const TOKEN_KEY = 'jwt_token';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private token: string | null = null;
 
-  constructor(private http: HttpClient) {
-    this.token = localStorage.getItem('jwt_token');
-  }
+  constructor(private http: HttpClient) {}
 
   login(credentials: AuthenticationRequest): Observable<AuthenticationResponse> {
-    return this.http.post<AuthenticationResponse>(apiUrl + 'login', credentials).pipe(
+    return this.http.post<AuthenticationResponse>(`${API_URL}/login`, credentials).pipe(
       tap(response => {
         if (response && response.token) {
-          this.token = response.token;
-          localStorage.setItem('jwt_token', response.token);
+          localStorage.setItem(TOKEN_KEY, response.token);
         }
       })
     );
   }
 
-  register(userData: RegistroRequest): Observable<any> {
-    // Al registrar, no guardamos el token para forzar al usuario a hacer login
-    return this.http.post<any>(apiUrl + 'register', userData);
+  register(userData: RegistroRequest): Observable<AuthenticationResponse> {
+    return this.http.post<AuthenticationResponse>(`${API_URL}/register`, userData);
   }
 
-  logout() {
-    this.token = null;
-    localStorage.removeItem('jwt_token');
+  logout(): void {
+    localStorage.removeItem(TOKEN_KEY);
   }
 
   getToken(): string | null {
-    return this.token;
+    return localStorage.getItem(TOKEN_KEY);
   }
 
   isAuthenticated(): boolean {
-    return !!this.token;
+    return !!this.getToken();
+  }
+
+  getUserRole(): string | null {
+    const userInfo = this.getUserInfoFromToken();
+    return userInfo.rol;
+  }
+
+  getUserInfoFromToken(): { id: number | null, nombre: string | null, rol: string | null } {
+    const token = this.getToken();
+    if (!token) {
+      return { id: null, nombre: null, rol: null };
+    }
+    try {
+      const decodedToken: any = jwtDecode(token);
+      return {
+        id: decodedToken.userId || null,
+        nombre: decodedToken.nombreUsuario || decodedToken.sub, // 'sub' (email) como fallback
+        rol: decodedToken.rol || null
+      };
+    } catch (error) {
+      console.error("Error decodificando el token:", error);
+      return { id: null, nombre: null, rol: null };
+    }
   }
 }

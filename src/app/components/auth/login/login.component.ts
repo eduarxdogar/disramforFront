@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-
-// Importaciones de Angular Material
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,27 +9,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
-// Importamos la interfaz de autenticación
 import { AuthenticationRequest } from '../../../model/authentication-request.model';
-
-// Importa el servicio de autenticación
 import { AuthService } from '../../../service/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSnackBarModule,
-    MatProgressSpinnerModule,
-    RouterLink
+    CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule,
+    MatInputModule, MatButtonModule, MatIconModule, MatSnackBarModule,
+    MatProgressSpinnerModule, RouterLink
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
@@ -60,22 +47,21 @@ export class LoginComponent implements OnInit {
 
   onSubmit(): void {
     if (this.loginForm.invalid) {
-      this.snackBar.open('Por favor, ingresa un correo y contraseña válidos.', 'Cerrar', { duration: 3000 });
       return;
     }
 
     this.loading = true;
     const credentials: AuthenticationRequest = this.loginForm.value;
+    
     this.authService.login(credentials).subscribe({
-      next: (response) => {
+      next: () => {
         this.loading = false;
-        this.snackBar.open('¡Inicio de sesión exitoso!', 'Cerrar', { duration: 3000 });
+        // La navegación DENTRO del 'next' soluciona la condición de carrera
         this.router.navigate(['/nuevo-pedido']);
       },
       error: (err) => {
         this.loading = false;
         this.snackBar.open('Credenciales inválidas. Por favor, inténtalo de nuevo.', 'Cerrar', { duration: 3000 });
-        console.error('Error de autenticación', err);
       }
     });
   }
