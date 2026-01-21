@@ -1,0 +1,57 @@
+@use '@angular/material' as mat;
+@use './tokens/colors' as tokens;
+
+// Configuración de Tipografía (Inter)
+$my-typography: mat.m2-define-typography-config(
+  $font-family: 'Inter, sans-serif',
+  $headline-1: mat.m2-define-typography-level(32px, 40px, 700),
+  $body-1: mat.m2-define-typography-level(14px, 20px, 400)
+);
+
+// Definir Paletas usando nuestros Tokens
+// Definir Paletas usando nuestros Tokens
+$my-primary: mat.m2-define-palette((
+  50: tokens.$primary-50,
+  100: tokens.$primary-100,
+  200: tokens.$primary-200,
+  300: tokens.$primary-300,
+  400: tokens.$primary-400,
+  500: tokens.$primary-500,
+  600: tokens.$primary-600,
+  700: tokens.$primary-600, // Alias para darker
+  800: tokens.$primary-600,
+  900: tokens.$primary-600,
+  contrast: (
+    500: tokens.$primary-contrast,
+    100: tokens.$primary-500, // Text on light background
+  )
+));
+
+// Accent: Solo tenemos 500, así que configuramos los defaults para usar 500
+$accent-map: (
+  500: tokens.$accent-500,
+  contrast: (
+    500: tokens.$accent-contrast,
+  )
+);
+$my-accent: mat.m2-define-palette($accent-map, 500, 500, 500);
+
+// Warn: Solo tenemos 500
+$warn-map: (
+  500: tokens.$warn-500,
+  contrast: (
+    500: white,
+  )
+);
+$my-warn: mat.m2-define-palette($warn-map, 500, 500, 500);
+
+// Crear el Tema
+$my-theme: mat.m2-define-light-theme((
+  color: (
+    primary: $my-primary,
+    accent: $my-accent,
+    warn: $my-warn,
+  ),
+  typography: $my-typography,
+  density: 0 // 0 es estándar, -1 o -2 es compacto (Enterprise)
+));

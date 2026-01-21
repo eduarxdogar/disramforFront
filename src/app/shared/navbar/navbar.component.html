@@ -87,7 +87,7 @@
           Iniciar Sesión
         </a>
         <!-- Register Button -->
-        <a routerLink="/registro" 
+        <a routerLink="/register" 
            class="text-sm font-bold px-6 py-2.5 rounded-full shadow-lg transition-transform hover:-translate-y-0.5"
            [ngClass]="{'bg-white text-indigo-700 hover:bg-blue-50': isTransparent, 'bg-slate-900 text-white hover:bg-slate-800': !isTransparent}">
           Registrarse
@@ -102,39 +102,37 @@
     <mat-icon>menu</mat-icon>
   </button>
 
+  <!-- Mobile Menu Overlay (Moved INSIDE toolbar for correct top-full positioning) -->
+  <div *ngIf="mobileMenuOpen" 
+       class="absolute top-full left-0 w-full bg-white shadow-xl z-50 md:hidden flex flex-col animate-fade-in-down border-t border-slate-100">
+    
+    <div class="flex flex-col p-6 gap-2">
+       <ng-container *ngIf="authService.isAuthenticated(); else mobileAuthButtons">
+          <a routerLink="/clientes" class="text-lg font-medium text-slate-800 py-4 border-b border-slate-50 flex justify-between items-center" (click)="toggleMobileMenu()">
+              Clientes <mat-icon class="text-slate-300">chevron_right</mat-icon>
+          </a>
+          <a routerLink="/pedidos" class="text-lg font-medium text-slate-800 py-4 border-b border-slate-50 flex justify-between items-center" (click)="toggleMobileMenu()">
+              Pedidos <mat-icon class="text-slate-300">chevron_right</mat-icon>
+          </a>
+          
+          <div class="mt-auto pt-8">
+             <button mat-flat-button color="warn" class="w-full !py-6 !rounded-xl" (click)="logout(); toggleMobileMenu()">
+               Cerrar Sesión
+             </button>
+          </div>
+       </ng-container>
+
+       <ng-template #mobileAuthButtons>
+          <div class="space-y-4 mt-4">
+             <a routerLink="/login" mat-stroked-button class="w-full !py-6 text-lg !border-slate-300 !text-slate-700 !rounded-xl" (click)="toggleMobileMenu()">
+               Iniciar Sesión
+             </a>
+             <a routerLink="/register" mat-flat-button class="w-full !py-6 text-lg !bg-slate-900 !text-white !rounded-xl" (click)="toggleMobileMenu()">
+               Registrarse
+             </a>
+          </div>
+       </ng-template>
+    </div>
+  </div>
+
 </mat-toolbar>
-
-<!-- Mobile Menu Overlay (Always White/Clean) -->
-<div *ngIf="mobileMenuOpen" class="absolute top-full left-0 w-full z-[60] bg-white shadow-xl border-t border-slate-100 md:hidden animate-fade-in-down flex flex-col">
-  <div class="hidden">
-    <!-- Header hidden inside menu since it drops down from navbar -->
-  </div>
-  
-  <div class="flex flex-col p-6 gap-2">
-     <ng-container *ngIf="authService.isAuthenticated(); else mobileAuthButtons">
-        <a routerLink="/clientes" class="text-lg font-medium text-slate-800 py-4 border-b border-slate-50 flex justify-between items-center" (click)="toggleMobileMenu()">
-            Clientes <mat-icon class="text-slate-300">chevron_right</mat-icon>
-        </a>
-        <a routerLink="/pedidos" class="text-lg font-medium text-slate-800 py-4 border-b border-slate-50 flex justify-between items-center" (click)="toggleMobileMenu()">
-            Pedidos <mat-icon class="text-slate-300">chevron_right</mat-icon>
-        </a>
-        
-        <div class="mt-auto pt-8">
-           <button mat-flat-button color="warn" class="w-full !py-6 !rounded-xl" (click)="logout(); toggleMobileMenu()">
-             Cerrar Sesión
-           </button>
-        </div>
-     </ng-container>
-
-     <ng-template #mobileAuthButtons>
-        <div class="space-y-4 mt-4">
-           <a routerLink="/login" mat-stroked-button class="w-full !py-6 text-lg !border-slate-300 !text-slate-700 !rounded-xl" (click)="toggleMobileMenu()">
-             Iniciar Sesión
-           </a>
-           <a routerLink="/registro" mat-flat-button class="w-full !py-6 text-lg !bg-slate-900 !text-white !rounded-xl" (click)="toggleMobileMenu()">
-             Registrarse
-           </a>
-        </div>
-     </ng-template>
-  </div>
-</div>
