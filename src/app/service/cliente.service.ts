@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Cliente, ClienteRequest, Page } from '../model/cliente.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClienteService {
-  private baseUrl = 'http://localhost:8080/api/clientes';
-
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
+  private baseUrl = environment.apiUrl;
 
   listarClientes(page: number, size: number, term: string = ''): Observable<Page<Cliente>> {
     const params = new HttpParams()
@@ -24,6 +24,29 @@ export class ClienteService {
     return this.http.get<Cliente>(`${this.baseUrl}/${id}`);
   }
 
+  /**
+   * Smart Service Method:
+   * Encapsula la lógica de decisión basada en el rol.
+   * Si es edición (id existente), usa PUT. Si es creación, usa POST.
+   */
+  saveCliente(cliente: ClienteRequest, role: string | null, id?: number): Observable<Cliente> {
+    const isEdit = !!id;
+
+    if (isEdit) {
+      if (role === 'ASESOR') {
+         return this.actualizarClienteComoAsesor(id!, cliente);
+      } else {
+         return this.actualizarCliente(id!, cliente);
+      }
+    } else {
+      if (role === 'ASESOR') {
+        return this.agregarClienteComoAsesor(cliente);
+      } else {
+        return this.agregarCliente(cliente);
+      }
+    }
+  }
+
   agregarCliente(cliente: ClienteRequest): Observable<Cliente> {
     return this.http.post<Cliente>(this.baseUrl, cliente);
   }
@@ -36,7 +59,6 @@ export class ClienteService {
     return this.http.put<Cliente>(`${this.baseUrl}/${id}`, cliente);
   }
 
-  // --- ¡NUEVO MÉTODO PARA ACTUALIZAR COMO ASESOR! ---
   actualizarClienteComoAsesor(id: number, cliente: ClienteRequest): Observable<Cliente> {
     return this.http.put<Cliente>(`${this.baseUrl}/asesor/${id}`, cliente);
   }

@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, numberAttribute, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
 
-// Tus modelos y servicios
 import { Cliente, ClienteRequest } from '../../model/cliente.model';
 import { ClienteService } from '../../service/cliente.service';
 import { AuthService } from '../../service/auth.service';
@@ -34,37 +33,41 @@ import { CommonModule } from '@angular/common';
   styleUrl: './cliente-form.component.css'
 })
 export class ClienteFormComponent implements OnInit {
+  // Dependencies using inject()
+  private fb = inject(FormBuilder);
+  private svc = inject(ClienteService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
+
+  // Router Input Binding
+  @Input({ transform: numberAttribute }) id?: number;
+
   form: FormGroup;
   isEdit = false;
-  clienteId: number | null = null;
   userRole: string | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private svc: ClienteService,
-    private authService: AuthService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private snackBar: MatSnackBar,
-  ){
+  constructor(){
     this.form = this.fb.group({
       nit: ['', Validators.required],
       nombre: ['', Validators.required],
       direccion: [''],
       ciudad: [''],
       telefono: [''],
-      email: ['', [Validators.email]]
+      email: ['', [Validators.email]],
+      // Mantenemos el campo oculto si es necesario para lógica interna, 
+      // aunque idealmente esto vendría del modelo si se usa.
+      asesorId: [''] 
     });
   }
 
   ngOnInit() {
     this.userRole = this.authService.getUserRole();
     
-    const id = this.route.snapshot.params['id'];
-    if (id) {
+    // Si tenemos ID gracias al Router Input binding
+    if (this.id) {
       this.isEdit = true;
-      this.clienteId = +id;
-      this.svc.getCliente(this.clienteId).subscribe(c => this.form.patchValue(c));
+      this.svc.getCliente(this.id).subscribe(c => this.form.patchValue(c));
     }
   }
 
@@ -73,7 +76,7 @@ export class ClienteFormComponent implements OnInit {
       this.snackBar.open('Por favor, revisa los campos del formulario.', 'Cerrar', { duration: 3000 });
       return;
     }
-
+    
     const confirmationMessage = this.isEdit
       ? '¿Confirmas la actualización de este cliente?'
       : '¿Confirmas la creación de este nuevo cliente?';
@@ -94,36 +97,11 @@ export class ClienteFormComponent implements OnInit {
       ciudad: dto.ciudad,
       telefono: dto.telefono,
       email: dto.email,
+      asesorId: dto.asesorId // Pasamos asesorId si existe en el formulario (admin case)
     };
 
-    let operation: Observable<Cliente>;
-
-    if (this.isEdit && this.clienteId) {
-      // --- LÓGICA DE ROLES PARA ACTUALIZAR ---
-      if (this.userRole === 'ASESOR') {
-        console.log(`Rol ASESOR. Actualizando cliente ${this.clienteId} por endpoint de asesor.`);
-        operation = this.svc.actualizarClienteComoAsesor(this.clienteId, clienteRequest);
-      } else {
-        console.log(`Rol ADMIN. Actualizando cliente ${this.clienteId} por endpoint de admin.`);
-        // Para que esto funcione, el admin necesita poder setear el asesorId.
-        // Por ahora, asumimos que no se cambia y lo enviamos si existe.
-        const originalCliente = this.form.getRawValue(); // Podríamos necesitar el asesorId original
-        clienteRequest.asesorId = originalCliente.asesorId;
-        operation = this.svc.actualizarCliente(this.clienteId, clienteRequest);
-      }
-    } else {
-      // Lógica de creación (ya funcional)
-      if (this.userRole === 'ASESOR') {
-        console.log("Rol ASESOR. Creando cliente por endpoint de asesor.");
-        operation = this.svc.agregarClienteComoAsesor(clienteRequest);
-      } else {
-        console.log("Rol ADMIN. Creando cliente por endpoint de admin.");
-        // Aquí se necesitaría un campo en el form para asignar asesorId
-        operation = this.svc.agregarCliente(clienteRequest);
-      }
-    }
-
-    operation.subscribe({
+    // Delegamos la lógica "sucia" de roles al servicio (Smart Service)
+    this.svc.saveCliente(clienteRequest, this.userRole, this.id).subscribe({
       next: () => {
         const successMessage = this.isEdit ? 'Cliente actualizado correctamente.' : 'Cliente creado correctamente.';
         this.snackBar.open(successMessage, 'OK', { duration: 3000 });

@@ -1,43 +1,125 @@
-<div class="bg-drf-gray min-h-screen flex items-center justify-center p-4 sm:p-6">
-  <mat-card class="w-full max-w-md rounded-xl shadow-2xl p-6 sm:p-8 transform transition-all hover:scale-105">
-    <mat-card-header class="text-center justify-center block">
-      <img src="https://placehold.co/150x50/0D47A1/FFFFFF?text=Disramfor" alt="Logo de Disramfor" class="mx-auto mb-4">
-      <mat-card-title class="text-2xl font-bold text-drf-blue">Iniciar Sesión</mat-card-title>
-      <mat-card-subtitle class="text-gray-500 mt-2">
-        Ingresa a tu cuenta para gestionar pedidos y catálogo.
-      </mat-card-subtitle>
-    </mat-card-header>
+<div class="min-h-screen flex bg-white">
+  
+  <!-- Left Column: Branding / Marketing -->
+  <div class="hidden lg:flex lg:w-1/2 relative bg-slate-900 overflow-hidden items-center justify-center">
+    <!-- Background Image with Overlay -->
+    <div class="absolute inset-0 z-0">
+      <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=2000&auto=format&fit=crop" 
+           alt="Automotive Background" 
+           class="w-full h-full object-cover opacity-40 mix-blend-overlay">
+      <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/90 to-blue-900/80"></div>
+    </div>
 
-    <mat-card-content class="mt-8">
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
-        <!-- Campo de Correo Electrónico con apariencia "outline" -->
-        <mat-form-field  class="w-full">
-          <mat-label>Correo Electrónico</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="ejemplo@correo.com">
-          <mat-icon matPrefix class="text-gray-400">email</mat-icon>
-          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">El correo es obligatorio</mat-error>
-          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Formato de correo inválido</mat-error>
-        </mat-form-field>
+    <!-- Content -->
+    <div class="relative z-10 p-12 text-white max-w-xl">
+      <div class="mb-8 p-3 bg-white/10 w-fit rounded-lg backdrop-blur-sm">
+        <mat-icon class="scale-150">settings_suggest</mat-icon>
+      </div>
+      <h1 class="text-5xl font-bold mb-6 tracking-tight leading-tight">
+        Ingeniería y <br> <span class="text-blue-400">Calidad Automotriz</span>
+      </h1>
+      <p class="text-lg text-slate-300 mb-8 leading-relaxed">
+        Gestiona tu inventario, realiza pedidos y optimiza la cadena de suministro de repuestos con la plataforma líder del mercado.
+      </p>
+      
+      <!-- Feature list -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-3">
+          <mat-icon class="text-blue-400">check_circle</mat-icon>
+          <span class="text-slate-200">Catálogo de partes actualizado en tiempo real</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <mat-icon class="text-blue-400">check_circle</mat-icon>
+          <span class="text-slate-200">Gestión de pedidos simplificada</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <mat-icon class="text-blue-400">check_circle</mat-icon>
+          <span class="text-slate-200">Soporte técnico especializado</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- Campo de Contraseña con apariencia "outline" -->
-        <mat-form-field  class="w-full">
-          <mat-label>Contraseña</mat-label>
-          <input matInput formControlName="password" type="password" placeholder="Tu contraseña">
-          <mat-icon matPrefix class="text-gray-400">lock</mat-icon>
-          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">La contraseña es obligatoria</mat-error>
-        </mat-form-field>
+  <!-- Right Column: Login Form -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-12 relative">
+    <div class="w-full max-w-md space-y-8">
+      
+      <!-- Mobile Header (Visible only on small screens) -->
+      <div class="lg:hidden text-center mb-8">
+        <h2 class="text-2xl font-bold text-slate-900">DISRAMFOR</h2>
+        <p class="text-slate-500">Empaques y repuestos</p>
+      </div>
 
-        <button mat-flat-button color="primary" class="w-full h-12 text-lg rounded-xl shadow-lg hover:shadow-xl transition-shadow" [disabled]="loginForm.invalid || loading">
-          <span *ngIf="!loading">Acceder</span>
-          <mat-spinner *ngIf="loading" color="drf-gold" diameter="24"></mat-spinner>
-        </button>
+      <!-- Form Header -->
+      <div class="text-center lg:text-left">
+        <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Bienvenido de nuevo</h2>
+        <p class="mt-2 text-slate-600">Por favor, ingresa tus credenciales para acceder</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="mt-8 space-y-6">
+        <div class="space-y-5">
+          
+          <!-- Email Field -->
+          <div class="relative">
+            <mat-form-field appearance="outline" class="w-full custom-mat-field">
+              <mat-label>Correo Electrónico</mat-label>
+              <input matInput formControlName="email" type="email" placeholder="nombre@empresa.com">
+              <mat-icon matPrefix class="mr-2 text-slate-400">mail_outline</mat-icon>
+              <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+                El correo es requerido
+              </mat-error>
+              <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
+                Ingresa un correo válido
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Password Field -->
+          <div class="relative">
+             <mat-form-field appearance="outline" class="w-full custom-mat-field">
+              <mat-label>Contraseña</mat-label>
+              <input matInput formControlName="password" type="password" placeholder="••••••••">
+              <mat-icon matPrefix class="mr-2 text-slate-400">lock_outline</mat-icon>
+              <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+                La contraseña es requerida
+              </mat-error>
+            </mat-form-field>
+            <div class="flex justify-end mt-1">
+              <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500">
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div>
+          <button mat-flat-button color="primary" type="submit" 
+                  [disabled]="loginForm.invalid || loading"
+                  class="w-full !py-6 !rounded-lg !text-base !font-medium shadow-lg shadow-blue-500/20 disabled:opacity-70 disabled:shadow-none transition-all duration-200 hover:shadow-blue-500/40">
+            <div class="flex items-center justify-center gap-2">
+              <mat-spinner *ngIf="loading" diameter="20" color="accent"></mat-spinner>
+              <span *ngIf="!loading">Acceder a la Plataforma</span>
+            </div>
+          </button>
+        </div>
       </form>
-    </mat-card-content>
-    
-    <mat-card-actions class="flex justify-center text-center">
-      <a routerLink="/register" class="text-sm text-drf-blue hover:underline">
-        ¿No tienes una cuenta? Regístrate aquí.
-      </a>
-    </mat-card-actions>
-  </mat-card>
+
+      <!-- Footer -->
+      <div class="text-center mt-6">
+        <p class="text-sm text-slate-600">
+          ¿No tienes una cuenta? 
+          <a routerLink="/registro" class="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+            Solicita acceso aquí
+          </a>
+        </p>
+      </div>
+      
+      <!-- Copyright/Footer Info -->
+      <div class="mt-12 pt-8 border-t border-slate-100 text-center text-xs text-slate-400">
+        &copy; 2024 DISRAMFOR S.A.S. Todos los derechos reservados.
+        <br>Plataforma segura Enterprise.
+      </div>
+    </div>
+  </div>
 </div>

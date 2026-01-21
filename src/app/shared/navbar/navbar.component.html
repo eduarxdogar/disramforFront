@@ -1,111 +1,99 @@
-<mat-toolbar color="primary" class="px-4 flex flex-wrap justify-between items-center text-white">
-  <!-- Título o logo de la empresa -->
-  <div class="flex items-center space-x-4">
-    <img src="assets/dis.png" alt="Logo DISRAMFOR" class="w-12 h-12 object-contain" />
-    <div>
-      <h1 class="text-xl font-bold tracking-wide">DISRAMFOR</h1>
-      <p class="text-sm font-light tracking-tight -mt-1">Empaques y repuestos para vehículos</p>
+<!-- navbar.component.html -->
+<mat-toolbar class="bg-white/90 backdrop-blur-md border-b border-slate-200 !h-16 shadow-sm sticky top-0 z-50 px-4 md:px-8 flex justify-between items-center transition-all duration-300">
+  
+  <!-- Left Side: Logo & Brand -->
+  <div class="flex items-center gap-4 cursor-pointer group" routerLink="/">
+    <!-- Logo Icon (or Image if available) -->
+    <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
+       <mat-icon class="scale-125">settings_suggest</mat-icon>
+    </div>
+    
+    <div class="flex flex-col leading-none">
+      <span class="text-xl font-bold text-slate-900 tracking-tight">DISRAMFOR</span>
+      <span class="text-slate-500 font-medium tracking-wide text-[10px] uppercase">Enterprise</span>
     </div>
   </div>
 
-  <!-- Opciones para pantallas medianas y mayores (desktop) -->
-  <div class="hidden md:flex space-x-4 items-center">
-    <!-- Botones que se muestran solo si el usuario está autenticado -->
-    <ng-container *ngIf="authService.isAuthenticated()">
-      <button
-        mat-raised-button
-        routerLinkActive="underline"
-        [routerLinkActiveOptions]="{ exact: true }"
-        routerLink="/nuevo-pedido"
-        class="flex items-center space-x-1 px-4 py-2 rounded-md shadow hover:shadow-lg transition-all duration-200">
-        <mat-icon>rocket_launch</mat-icon>
-        <span class="font-medium">Nuevo Pedido</span>
-      </button>
-      <button
-        mat-button
-        routerLink="/clientes"
-        routerLinkActive="underline"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="flex items-center space-x-1 px-4 py-2 rounded-md shadow hover:shadow-lg transition-all duration-200">
-        <mat-icon>people</mat-icon>
-        <span>Clientes</span>
-      </button>
-      <button
-        mat-button
-        routerLink="/pedidos"
-        routerLinkActive="underline"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="flex items-center space-x-1 px-4 py-2 rounded-md shadow hover:shadow-lg transition-all duration-200">
-        <mat-icon>assignment</mat-icon>
-        <span>Ver Pedidos</span>
-      </button>
-      <!-- Menú de usuario -->
-      <button
-        mat-icon-button
-        [matMenuTriggerFor]="menuUser"
-        class="flex items-center space-x-1 px-4 py-2 rounded-md shadow hover:shadow-lg transition-all duration-200">
-        <mat-icon>account_circle</mat-icon>
-      </button>
+  <!-- Right Side: Desktop Menu -->
+  <div class="hidden md:flex items-center gap-6">
+    <!-- Navigation Links (Example) -->
+    <nav class="flex gap-6 mr-6 border-r border-slate-200 pr-6 h-8 items-center" *ngIf="authService.isAuthenticated()">
+      <a routerLink="/clientes" routerLinkActive="text-blue-600 font-semibold bg-blue-50/50" class="text-sm font-medium text-slate-600 hover:text-blue-600 px-3 py-1.5 rounded-md transition-colors">Clientes</a>
+      <a routerLink="/pedidos" routerLinkActive="text-blue-600 font-semibold bg-blue-50/50" class="text-sm font-medium text-slate-600 hover:text-blue-600 px-3 py-1.5 rounded-md transition-colors">Pedidos</a>
+    </nav>
+
+    <ng-container *ngIf="authService.isAuthenticated(); else authButtons">
+      <!-- Authenticated User Menu -->
+      <div class="flex items-center gap-3 pl-2">
+        <div class="text-right hidden lg:block">
+          <p class="text-sm font-bold text-slate-800 leading-none">Usuario</p>
+          <p class="text-xs text-slate-500">Admin</p>
+        </div>
+        <button mat-icon-button class="!border !border-slate-200 !text-slate-600 hover:!bg-slate-50 !w-10 !h-10" [matMenuTriggerFor]="userMenu">
+          <mat-icon>person</mat-icon>
+        </button>
+      </div>
+      
+      <mat-menu #userMenu="matMenu" class="mt-2 custom-menu">
+        <button mat-menu-item routerLink="/perfil">
+          <mat-icon class="text-slate-500">account_circle</mat-icon>
+          <span>Mi Perfil</span>
+        </button>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon class="text-rose-500">logout</mat-icon>
+          <span class="text-rose-600">Cerrar Sesión</span>
+        </button>
+      </mat-menu>
     </ng-container>
 
-    <!-- Botones que se muestran si el usuario NO está autenticado -->
-    <ng-container *ngIf="!authService.isAuthenticated()">
-      <button mat-button routerLink="/login" class="flex items-center space-x-1 px-4 py-2 rounded-md shadow hover:shadow-lg transition-all duration-200">
-        <mat-icon>login</mat-icon>
-        <span>Iniciar Sesión</span>
-      </button>
-      <button mat-button routerLink="/register" class="flex items-center space-x-1 px-4 py-2 rounded-md shadow hover:shadow-lg transition-all duration-200">
-        <mat-icon>person_add</mat-icon>
-        <span>Registrarse</span>
-      </button>
-    </ng-container>
+    <ng-template #authButtons>
+      <div class="flex items-center gap-3">
+        <a routerLink="/login" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors px-4 py-2">
+          Iniciar Sesión
+        </a>
+        <a routerLink="/registro" class="bg-slate-900 text-white text-sm font-medium px-5 py-2.5 rounded-full hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
+          Registrarse
+        </a>
+      </div>
+    </ng-template>
   </div>
 
-  <!-- Botón para menú móvil -->
-  <div class="md:hidden">
-    <button (click)="toggleMobileMenu()" class="text-white focus:outline-none">
-      <mat-icon>menu</mat-icon>
-    </button>
-  </div>
+  <!-- Mobile Menu Button -->
+  <button mat-icon-button (click)="toggleMobileMenu()" class="md:hidden !text-slate-700">
+    <mat-icon>menu</mat-icon>
+  </button>
+
 </mat-toolbar>
 
-<!-- Menú móvil -->
-<div *ngIf="mobileMenuOpen" class="md:hidden bg-drf-blue text-white px-4 py-2 space-y-2">
-  <ng-container *ngIf="authService.isAuthenticated()">
-    <button mat-button routerLink="/nuevo-pedido" class="block w-full text-left flex items-center space-x-2">
-      <mat-icon>add_circle</mat-icon>
-      <span>Nuevo Pedido</span>
+<!-- Mobile Menu Overlay -->
+<div *ngIf="mobileMenuOpen" class="fixed inset-0 z-40 bg-white md:hidden animate-fade-in-down flex flex-col">
+  <div class="p-4 flex justify-between items-center border-b border-slate-100">
+    <span class="font-bold text-slate-900 text-lg">Menú</span>
+    <button mat-icon-button (click)="toggleMobileMenu()">
+      <mat-icon>close</mat-icon>
     </button>
-    <button mat-button routerLink="/clientes" class="block w-full text-left flex items-center space-x-2">
-      <mat-icon>people</mat-icon>
-      <span>Clientes</span>
-    </button>
-    <button mat-button routerLink="/pedidos" class="block w-full text-left flex items-center space-x-2">
-      <mat-icon>assignment</mat-icon>
-      <span>Ver Pedidos</span>
-    </button>
-    <button mat-button (click)="logout()" class="block w-full text-left flex items-center space-x-2">
-      <mat-icon>logout</mat-icon>
-      <span>Cerrar sesión</span>
-    </button>
-  </ng-container>
+  </div>
   
-  <ng-container *ngIf="!authService.isAuthenticated()">
-    <button mat-button routerLink="/login" class="block w-full text-left flex items-center space-x-2">
-      <mat-icon>login</mat-icon>
-      <span>Iniciar Sesión</span>
-    </button>
-    <button mat-button routerLink="/register" class="block w-full text-left flex items-center space-x-2">
-      <mat-icon>person_add</mat-icon>
-      <span>Registrarse</span>
-    </button>
-  </ng-container>
-</div>
+  <div class="flex flex-col p-6 gap-4">
+     <ng-container *ngIf="authService.isAuthenticated(); else mobileAuthButtons">
+        <a routerLink="/clientes" class="text-lg font-medium text-slate-800 py-3 border-b border-slate-50" (click)="toggleMobileMenu()">Clientes</a>
+        <a routerLink="/pedidos" class="text-lg font-medium text-slate-800 py-3 border-b border-slate-50" (click)="toggleMobileMenu()">Pedidos</a>
+        
+        <div class="mt-8 pt-8 border-t border-slate-100">
+           <button mat-button class="text-lg w-full text-left justify-start px-0 mb-4" routerLink="/perfil" (click)="toggleMobileMenu()">
+             <mat-icon class="mr-2">account_circle</mat-icon> Mi Perfil
+           </button>
+           <button mat-flat-button color="warn" class="w-full !py-6" (click)="logout(); toggleMobileMenu()">
+             Cerrar Sesión
+           </button>
+        </div>
+     </ng-container>
 
-<!-- Menú desplegable del usuario (desktop) -->
-<mat-menu #menuUser="matMenu">
-  <button mat-menu-item (click)="logout()">
-    <mat-icon>logout</mat-icon>
-    <span>Cerrar sesión</span>
-  </button>
-</mat-menu>
+     <ng-template #mobileAuthButtons>
+        <div class="space-y-4 mt-8">
+           <a routerLink="/login" mat-stroked-button class="w-full !py-6 text-lg !border-slate-300" (click)="toggleMobileMenu()">Iniciar Sesión</a>
+           <a routerLink="/registro" mat-flat-button class="w-full !py-6 text-lg !bg-slate-900 !text-white" (click)="toggleMobileMenu()">Registrarse</a>
+        </div>
+     </ng-template>
+  </div>
+</div>

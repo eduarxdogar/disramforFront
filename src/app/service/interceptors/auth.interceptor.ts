@@ -1,41 +1,28 @@
-import { Injectable } from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor
-} from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { AuthService } from '../auth.service'; // Asegúrate que esta ruta es correcta
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../auth.service';
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  
+  // --- LÍNEA DE DEPURACIÓN #1 ---
+  console.log('AuthInterceptor: Interceptando petición a ->', req.url);
 
-  constructor(private authService: AuthService) {}
+  const token = authService.getToken();
 
-  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // --- LÍNEA DE DEPURACIÓN #1 ---
-    // Este mensaje aparecerá en la consola del navegador por CADA petición HTTP.
-    console.log('AuthInterceptor: Interceptando petición a ->', request.url);
-
-    const token = this.authService.getToken();
-
-    if (token) {
-      // --- LÍNEA DE DEPURACIÓN #2 ---
-      // Si encontramos un token, lo mostraremos aquí.
-      console.log('AuthInterceptor: Token encontrado. Adjuntando a la petición.');
-
-      request = request.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    } else {
-      // --- LÍNEA DE DEPURACIÓN #3 ---
-      // Si NO encontramos un token, lo sabremos.
-      console.warn('AuthInterceptor: No se encontró token en AuthService.');
-    }
-
-    return next.handle(request);
+  if (token) {
+    // --- LÍNEA DE DEPURACIÓN #2 ---
+    console.log('AuthInterceptor: Token encontrado. Adjuntando a la petición.');
+    
+    const clonedRequest = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return next(clonedRequest);
+  } else {
+    // --- LÍNEA DE DEPURACIÓN #3 ---
+    console.warn('AuthInterceptor: No se encontró token en AuthService.');
+    return next(req);
   }
-}
+};

@@ -1,0 +1,28 @@
+/* Custom styles for Material Form Fields to make them look like Stripe/Auth0 inputs */
+.custom-mat-field .mat-mdc-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+.custom-mat-field.mat-mdc-form-field {
+  --mdc-filled-text-field-container-color: #ffffff;
+  --mdc-filled-text-field-focus-active-indicator-color: #2563eb; /* Tailwind blue-600 */
+}
+
+/* Override input background to white explicitly if using outline appearance */
+:host ::ng-deep .custom-mat-field .mat-mdc-text-field-wrapper {
+  background-color: transparent !important;
+}
+
+:host ::ng-deep .custom-mat-field .mat-mdc-form-field-flex {
+  background-color: transparent !important;
+}
+
+/* Make icons darker */
+:host ::ng-deep .mat-icon {
+  vertical-align: middle;
+}
+
+/* Remove default padding from button to control it via Tailwind */
+button.mat-mdc-flat-button {
+  height: auto !important;
+}
