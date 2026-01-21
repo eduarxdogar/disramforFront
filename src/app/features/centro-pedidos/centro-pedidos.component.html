@@ -1,10 +1,32 @@
-<div class="flex h-screen overflow-hidden bg-[var(--bg-body)]">
+<div class="flex h-screen overflow-hidden bg-[var(--bg-body)] flex-col lg:flex-row relative">
+
+  <!-- Mobile Top Bar -->
+  <div class="lg:hidden bg-white shadow-sm p-4 flex justify-between items-center z-20 sticky top-0">
+      <div>
+        <h1 class="font-bold text-slate-900 text-lg">Nuevo Pedido</h1>
+        <p class="text-xs text-slate-500">Catálogo de Productos</p>
+      </div>
+      <button (click)="toggleMobileFilters()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+          <mat-icon>filter_list</mat-icon>
+      </button>
+  </div>
 
   <!-- Sidebar: Filters & Client Selection -->
-  <aside class="w-80 flex-shrink-0 bg-[var(--color-primary)] text-white flex flex-col shadow-2xl z-10">
-    <div class="p-6 border-b border-slate-700">
-      <h2 class="text-xl font-bold tracking-tight">Nuevo Pedido</h2>
-      <p class="text-sm text-slate-400 mt-1">Catálogo de Productos</p>
+  <!-- Responsive Logic: Hidden on mobile by default, Flex on desktop. Toggled via ngClass. -->
+  <aside 
+    class="flex-shrink-0 bg-[var(--color-primary)] text-white flex-col shadow-2xl z-30 transition-all duration-300
+           fixed inset-0 lg:static lg:w-80 lg:h-auto overflow-hidden"
+    [ngClass]="showMobileFilters ? 'flex' : 'hidden lg:flex'">
+    
+    <div class="p-6 border-b border-slate-700 flex justify-between items-center">
+      <div>
+        <h2 class="text-xl font-bold tracking-tight">Opciones</h2>
+        <p class="text-sm text-slate-400 mt-1 hidden lg:block">Configura tu pedido</p>
+      </div>
+      <!-- Close button for mobile -->
+      <button (click)="toggleMobileFilters()" class="lg:hidden text-slate-400 hover:text-white">
+          <mat-icon>close</mat-icon>
+      </button>
     </div>
 
     <div class="flex-1 overflow-y-auto p-6 space-y-8">
@@ -20,10 +42,10 @@
               [matAutocomplete]="auto"
               class="w-full bg-slate-800 text-white rounded-lg border-slate-700 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent placeholder-slate-500 py-2.5 px-4 text-sm"
             >
-            <mat-icon *ngIf="!selectedClient" class="absolute right-3 top-2.5 text-slate-500 text-lg">search</mat-icon>
             <button *ngIf="selectedClient" (click)="clearClientSelection()" class="absolute right-3 top-2.5 text-slate-400 hover:text-white">
               <mat-icon class="text-lg">close</mat-icon>
             </button>
+            <mat-icon *ngIf="!selectedClient" class="absolute right-3 top-2.5 text-slate-500 text-lg">search</mat-icon>
           </div>
           <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayCliente" (optionSelected)="onClientSelected($event)">
               <mat-option *ngFor="let cliente of filteredClientes$ | async" [value]="cliente" class="text-sm">
@@ -34,7 +56,7 @@
           <div *ngIf="selectedClient" class="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
             <p class="text-sm font-semibold text-white">{{ selectedClient.nombre }}</p>
             <p class="text-xs text-slate-400 mt-1">{{ selectedClient.direccion }}</p>
-            <app-ui-badge variant="outline" class="mt-2 text-slate-300 border-slate-600">
+            <app-ui-badge variant="default" class="mt-2 text-slate-300 border-slate-600">
               {{ 'NIT: ' + selectedClient.nit }}
             </app-ui-badge>
           </div>
@@ -68,35 +90,43 @@
       
     </div>
 
-    <!-- Order Summary (Mini) -->
-    <div class="p-4 bg-slate-900 border-t border-slate-800">
+    <!-- Order Summary (Desktop View) -->
+    <div class="hidden lg:block p-4 bg-slate-900 border-t border-slate-800">
       <div class="flex justify-between items-center mb-4">
         <span class="text-sm text-slate-400">Total Pedido</span>
         <span class="text-xl font-bold text-white">{{ getSubtotal() | currency }}</span>
       </div>
-      <app-ui-button 
-        variant="primary" 
-        [fullWidth]="true" 
-        [disabled]="!selectedClient || pedidoActual.length === 0 || isLoading"
-        (click)="finalizarPedido()"
-      >
-        <span *ngIf="!isLoading">{{ isEditMode ? 'Actualizar Pedido' : 'Confirmar Pedido' }}</span>
-        <mat-spinner *ngIf="isLoading" diameter="20" class="mx-auto"></mat-spinner>
-      </app-ui-button>
+      <div class="flex gap-2">
+         <app-ui-button 
+           variant="secondary"
+           class="hover:secondary flex-1"
+           (click)="cancelarPedido()"
+           [disabled]="!selectedClient || pedidoActual.length === 0 || isLoading">
+           Cancelar
+         </app-ui-button>
+         <app-ui-button 
+            variant="primary" 
+            class="flex-1"
+            [disabled]="!selectedClient || pedidoActual.length === 0 || isLoading"
+            (click)="finalizarPedido()">
+            <span *ngIf="!isLoading">{{ isEditMode ? 'Actualizar' : 'Confirmar' }}</span>
+            <mat-spinner *ngIf="isLoading" diameter="20" class="mx-auto"></mat-spinner>
+         </app-ui-button>
+      </div>
     </div>
   </aside>
 
   <!-- Main Content: Product Grid -->
-  <main class="flex-1 overflow-y-auto p-8">
+  <main class="flex-1 overflow-y-auto p-4 sm:p-8 pb-32 lg:pb-8 bg-slate-50">
     
-    <header class="mb-8 flex items-center justify-between">
+    <header class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Productos</h1>
-        <p class="text-slate-500 mt-1">Selecciona los productos para agregar al pedido.</p>
+        <h1 class="text-2xl font-bold text-slate-900 hidden lg:block">Productos</h1>
+        <p class="text-slate-500 mt-1 hidden lg:block">Selecciona productos para tu pedido.</p>
       </div>
-      <!-- Optional: Top bar actions or user info -->
-      <div class="flex items-center gap-2">
-         <span class="text-sm font-medium text-slate-600">Asesor: {{ asesorInfo.nombre }}</span>
+      <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm border border-slate-200">
+         <mat-icon class="text-slate-400 !w-4 !h-4 !text-[16px]">person</mat-icon>
+         <span class="text-xs font-semibold text-slate-600 uppercase tracking-wide">{{ asesorInfo.nombre }}</span>
       </div>
     </header>
 
@@ -104,43 +134,41 @@
        <mat-spinner diameter="40"></mat-spinner>
     </div>
 
-    <div *ngIf="!isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <!-- Grid -->
+    <div *ngIf="!isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
       <ng-container *ngFor="let producto of productos">
         <app-ui-card 
           [image]="'assets/' + producto.imagenUrl"
           [alt]="producto.nombre"
-          class="flex flex-col h-full bg-white transition-transform hover:-translate-y-1 hover:shadow-md duration-200">
+          class="flex flex-col h-full bg-white transition-all hover:shadow-lg duration-200 group">
           
-          <!-- Price Badge on Image -->
-          <app-ui-badge card-badge variant="secondary" class="font-mono shadow-sm">
+          <!-- Price Badge -->
+          <app-ui-badge card-badge variant="secondary" class="font-mono shadow-sm opacity-90 group-hover:opacity-100">
             {{ producto.precioUnitario | currency }}
           </app-ui-badge>
 
-          <!-- Card Content -->
           <div class="flex flex-col gap-2 h-full">
             <div class="flex-1">
-               <p class="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">{{ producto.codigo }}</p>
-               <h3 class="font-semibold text-slate-900 leading-tight mb-2 line-clamp-2 min-h-[2.5rem]" title="{{ producto.nombre }}">
+               <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{{ producto.codigo }}</p>
+               <h3 class="font-semibold text-slate-900 leading-snug mb-2 line-clamp-2 min-h-[2.5rem]" title="{{ producto.nombre }}">
                  {{ producto.nombre }}
                </h3>
             </div>
 
-            <!-- Actions -->
             <div class="mt-auto pt-3 border-t border-slate-50 flex items-center justify-between gap-2">
-               <!-- Quantity Controls if added -->
+               <!-- Quantity Logic -->
                <ng-container *ngIf="comprobarCantidad(producto) > 0">
-                   <div class="flex items-center gap-2 bg-slate-50 rounded-lg p-1 border border-slate-100">
-                       <button (click)="quitarDelPedido(producto)" class="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-red-600 hover:bg-white rounded transition-colors">
-                         <mat-icon class="!w-4 !h-4 !text-[16px] leading-none">remove</mat-icon>
+                   <div class="flex items-center gap-1 bg-slate-50 rounded-lg p-1 border border-slate-100 w-full justify-between">
+                       <button (click)="quitarDelPedido(producto)" class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-red-600 hover:bg-white rounded transition-colors">
+                         <mat-icon class="!w-5 !h-5 !text-[20px]">remove</mat-icon>
                        </button>
-                       <span class="text-xs font-bold text-slate-900 w-4 text-center">{{ comprobarCantidad(producto) }}</span>
-                       <button (click)="agregarAlPedido(producto)" class="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-[var(--color-primary)] hover:bg-white rounded transition-colors">
-                         <mat-icon class="!w-4 !h-4 !text-[16px] leading-none">add</mat-icon>
+                       <span class="text-sm font-bold text-slate-900">{{ comprobarCantidad(producto) }}</span>
+                       <button (click)="agregarAlPedido(producto)" class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-[var(--color-primary)] hover:bg-white rounded transition-colors">
+                         <mat-icon class="!w-5 !h-5 !text-[20px]">add</mat-icon>
                        </button>
                    </div>
                </ng-container>
 
-               <!-- Add Button if 0 (or allow adding more) -->
                <div *ngIf="comprobarCantidad(producto) === 0" class="w-full">
                  <app-ui-button variant="primary" size="sm" [fullWidth]="true" (click)="agregarAlPedido(producto)">
                    Agregar
@@ -158,8 +186,43 @@
          <mat-icon class="text-4xl text-slate-400 w-10 h-10">search_off</mat-icon>
        </div>
        <h3 class="text-lg font-medium text-slate-900">No se encontraron productos</h3>
-       <p class="text-slate-500 max-w-sm mt-1">Intenta ajustar tu búsqueda o filtros para encontrar lo que necesitas.</p>
+       <p class="text-slate-500 max-w-sm mt-1">Ajusta tus filtros de búsqueda.</p>
+    </div>
+
+    <!-- Paginator -->
+    <div class="mt-8 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+       <mat-paginator 
+          [length]="totalElements"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="pageSizeOptions"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+       </mat-paginator>
     </div>
 
   </main>
+
+  <!-- Mobile Fixed Footer -->
+  <div class="lg:hidden fixed bottom-0 left-0 w-full bg-slate-900 p-4 z-40 shadow-[0_-4px_10px_rgba(0,0,0,0.3)]">
+      <div class="flex flex-col gap-3">
+          <div class="flex justify-between items-center text-white">
+              <span class="text-sm text-slate-400">Total Estimado</span>
+              <span class="text-xl font-bold">{{ getSubtotal() | currency }}</span>
+          </div>
+          <div class="flex gap-2 h-10">
+               <button (click)="cancelarPedido()" [disabled]="pedidoActual.length === 0" class="flex-1 rounded-md border border-red-500/50 text-red-400 font-medium text-sm hover:bg-red-900/20 disabled:opacity-50">
+                   Cancelar
+               </button>
+               <button (click)="finalizarPedido()" [disabled]="!selectedClient || pedidoActual.length === 0 || isLoading" class="flex-[2] rounded-md bg-[var(--color-primary)] text-white font-bold text-sm shadow-lg hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-700">
+                   <ng-container *ngIf="!isLoading; else loadingIcon">
+                       {{ isEditMode ? 'Actualizar' : 'Confirmar Pedido' }}
+                   </ng-container>
+                   <ng-template #loadingIcon>
+                       <mat-spinner diameter="18" class="inline-block"></mat-spinner>
+                   </ng-template>
+               </button>
+          </div>
+      </div>
+  </div>
+
 </div>

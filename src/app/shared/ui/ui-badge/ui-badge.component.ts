@@ -16,7 +16,7 @@ import { CommonModule } from '@angular/common';
   styles: []
 })
 export class UiBadgeComponent {
-  @Input() variant: 'default' | 'outline' | 'secondary' = 'default';
+  @Input() variant: 'default' | 'outline' | 'secondary' | 'success' | 'warning' | 'destructive' = 'default';
 
   getClasses(): string {
     switch (this.variant) {
@@ -26,6 +26,12 @@ export class UiBadgeComponent {
         return 'bg-slate-100 text-slate-800';
       case 'outline':
         return 'text-slate-900 ring-1 ring-inset ring-slate-200';
+      case 'success':
+        return 'bg-emerald-100 text-emerald-700';
+      case 'warning':
+        return 'bg-amber-100 text-amber-700';
+      case 'destructive':
+        return 'bg-red-100 text-red-700';
       default:
         return 'bg-[var(--color-primary)] text-white';
     }

@@ -5,11 +5,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, startWith, switchMap, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
-// Angular Material Imports (Keeping for functionality not yet replaced or managed by shared UI)
+// Angular Material Imports
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 // Shared UI
 import { UiButtonComponent } from '../../shared/ui/ui-button/ui-button.component';
@@ -37,6 +38,7 @@ import { Cliente } from '../../model/cliente.model';
     MatSnackBarModule, 
     MatAutocompleteModule, 
     MatProgressSpinnerModule,
+    MatPaginatorModule,
     UiButtonComponent,
     UiCardComponent,
     UiBadgeComponent
@@ -55,8 +57,9 @@ export class CentroPedidosComponent implements OnInit {
   
   productos: Producto[] = [];
   totalElements = 0;
-  pageSize = 12; // Adjusted for grid
+  pageSize = 12; 
   pageIndex = 0;
+  pageSizeOptions = [8, 12, 24, 48];
   
   pedidoActual: ArticuloPedido[] = [];
   categorias: Categoria[] = [];
@@ -65,6 +68,9 @@ export class CentroPedidosComponent implements OnInit {
   isEditMode = false;
   pedidoIdParaEditar: number | null = null;
   isLoading = false;
+  
+  // Mobile Responsiveness
+  showMobileFilters = false;
 
   constructor(
     private route: ActivatedRoute, 
@@ -113,6 +119,10 @@ export class CentroPedidosComponent implements OnInit {
       this.pageIndex = 0;
       this.buscarProductos();
     });
+  }
+
+  toggleMobileFilters(): void {
+    this.showMobileFilters = !this.showMobileFilters;
   }
 
   iniciarBusquedaClientes(): void {
@@ -168,6 +178,18 @@ export class CentroPedidosComponent implements OnInit {
     });
   }
 
+  cancelarPedido(): void {
+    if (confirm('¿Estás seguro de que deseas cancelar el pedido actual? Se perderán los productos seleccionados.')) {
+        this.limpiarPedido();
+        this.selectedClient = null;
+        this.clienteControl.setValue('');
+        this.snackBar.open('Pedido cancelado y carrito limpio.', 'OK', { duration: 3000 });
+        if (this.isEditMode) {
+          this.router.navigate(['/pedidos']);
+        }
+    }
+  }
+
   cargarPedidoParaEditar(id: number): void {
     this.isLoading = true;
     this.pedidoService.getPedidoById(id).subscribe({
@@ -221,11 +243,10 @@ export class CentroPedidosComponent implements OnInit {
       });
   }
 
-  // Simplified pagination for grid (Load More style or just keeping it simple for now)
-  // Reusing existing logic but might need UI adaptation
-  onPageChange(event: any): void {
-    // Implementation needed if using paginator, otherwise load more
-    // Keeping it simple for now, assuming external control or future implementation
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.buscarProductos();
   }
 
   comprobarCantidad(producto: Producto): number {

@@ -1,14 +1,8 @@
-// src/app/app.routes.ts
 import { provideRouter, Routes } from '@angular/router';
-
-// --- Tus componentes existentes ---
 import { ClienteFormComponent } from './clientes/cliente-form/cliente-form.component';
 import { ClienteListComponent } from './clientes/cliente-list/cliente-list.component';
-// import { PedidoFormComponent } from './pedidos/pedido-form/pedido-form.component'; // Ya no lo necesitas para crear
 import { PedidoListComponent } from './features/pedido-list/pedido-list.component';
 import { PedidoDetalleComponent } from './features/pedido-detalle/pedido-detalle.component';
-
-// --- ¡IMPORTAMOS NUESTRO NUEVO COMPONENTE! ---
 import { CentroPedidosComponent } from './features/centro-pedidos/centro-pedidos.component';
 import { LoginComponent } from './components/auth/login/login.component';
 import { RegisterComponent } from './components/auth/register/register.component';
@@ -31,7 +25,6 @@ export const routes: Routes = [
   { path: 'pedidos/detalle/:id', component: PedidoDetalleComponent },
 
   // Redirección por defecto a la ruta de login
-  // Esto asegura que el usuario vea el login al entrar
   { path: '**', redirectTo: 'login' }
 ];
 

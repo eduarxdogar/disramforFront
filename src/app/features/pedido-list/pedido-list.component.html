@@ -1,134 +1,137 @@
 <!-- src/app/features/pedido-list/pedido-list.component.html -->
-<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">Historial de Pedidos</h1>
-        <button mat-flat-button color="primary" routerLink="/nuevo-pedido">
-            <mat-icon class="mr-2">add</mat-icon>
-            <span>Crear Nuevo Pedido</span>
-        </button>
+<div class="min-h-screen bg-[var(--bg-body)]">
+    
+    <!-- Hero Header -->
+    <div class="bg-slate-900 pt-8 pb-32 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                 <h1 class="text-3xl font-bold text-white tracking-tight">Historial de Pedidos</h1>
+                 <p class="text-slate-400 mt-1">Gestiona y realiza seguimiento de todos los pedidos registrados.</p>
+            </div>
+            <app-ui-button variant="primary" routerLink="/nuevo-pedido" class="shadow-lg shadow-blue-900/20">
+                <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">add</mat-icon>
+                <span>Crear Nuevo Pedido</span>
+            </app-ui-button>
+        </div>
     </div>
 
-    <!-- Contenedor principal que gestiona la visibilidad -->
-    <div class="mat-elevation-z8 bg-white rounded-lg overflow-hidden">
+    <!-- Main Content with Overlap -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20">
         
-        <!-- VISTA DE TABLA: Visible solo en pantallas medianas (md) y superiores -->
-        <div class="hidden md:block">
-            <table mat-table [dataSource]="dataSource" class="w-full">
-                <!-- Columna ID -->
-                <ng-container matColumnDef="id">
-                    <th mat-header-cell *matHeaderCellDef class="p-4"> # Pedido </th>
-                    <td mat-cell *matCellDef="let p" class="p-4 font-medium"> {{p.id}} </td>
-                </ng-container>
+        <!-- Data Grid Container -->
+        <app-ui-card class="block overflow-hidden shadow-xl border-0 ring-1 ring-slate-900/5">
+            
+            <!-- VISTA DE TABLA: Visible en md+ -->
+            <div class="hidden md:block overflow-x-auto">
+                <table mat-table [dataSource]="dataSource" class="w-full text-left">
+                    
+                    <!-- Columna ID -->
+                    <ng-container matColumnDef="id">
+                        <th mat-header-cell *matHeaderCellDef class="bg-slate-100 py-4 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200"> # </th>
+                        <td mat-cell *matCellDef="let p" class="py-4 px-6 text-sm text-slate-500 border-b border-slate-100"> {{p.id}} </td>
+                    </ng-container>
 
-                <!-- Columna Fecha -->
-                <ng-container matColumnDef="fecha">
-                    <th mat-header-cell *matHeaderCellDef class="p-4"> Fecha </th>
-                    <td mat-cell *matCellDef="let p" class="p-4"> {{p.fecha | date:'dd/MM/yyyy h:mm a'}} </td>
-                </ng-container>
+                    <!-- Columna Fecha -->
+                    <ng-container matColumnDef="fecha">
+                        <th mat-header-cell *matHeaderCellDef class="bg-slate-100 py-4 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200"> Fecha </th>
+                        <td mat-cell *matCellDef="let p" class="py-4 px-6 text-sm text-slate-600 border-b border-slate-100"> {{p.fecha | date:'dd MMM yyyy, h:mm a'}} </td>
+                    </ng-container>
 
-                <!-- Columna Cliente -->
-                <ng-container matColumnDef="clienteNombre">
-                    <th mat-header-cell *matHeaderCellDef class="p-4"> Cliente </th>
-                    <td mat-cell *matCellDef="let p" class="p-4"> {{p.clienteNombre}} </td>
-                </ng-container>
-                
-                <!-- Columna Asesor -->
-                <ng-container matColumnDef="asesorNombre">
-                    <th mat-header-cell *matHeaderCellDef class="p-4"> Asesor </th>
-                    <td mat-cell *matCellDef="let p" class="p-4"> {{p.asesorNombre}} </td>
-                </ng-container>
+                    <!-- Columna Cliente -->
+                    <ng-container matColumnDef="clienteNombre">
+                        <th mat-header-cell *matHeaderCellDef class="bg-slate-100 py-4 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200"> Cliente </th>
+                        <td mat-cell *matCellDef="let p" class="py-4 px-6 border-b border-slate-100"> 
+                            <div class="flex flex-col">
+                                <span class="font-semibold text-slate-900">{{p.clienteNombre}}</span>
+                                <span class="text-xs text-slate-500">Cliente Registrado</span>
+                            </div>
+                        </td>
+                    </ng-container>
+                    
+                    <!-- Columna Asesor -->
+                    <ng-container matColumnDef="asesorNombre">
+                        <th mat-header-cell *matHeaderCellDef class="bg-slate-100 py-4 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200"> Asesor </th>
+                        <td mat-cell *matCellDef="let p" class="py-4 px-6 border-b border-slate-100"> 
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-xs font-bold ring-1 ring-indigo-100">
+                                    {{ getInitials(p.asesorNombre) }}
+                                </div>
+                                <span class="text-sm text-slate-700">{{ p.asesorNombre }}</span>
+                            </div>
+                        </td>
+                    </ng-container>
 
-                <!-- Columna Total -->
-                <ng-container matColumnDef="total">
-                    <th mat-header-cell *matHeaderCellDef class="p-4 text-right"> Total </th>
-                    <td mat-cell *matCellDef="let p" class="p-4 text-right font-semibold"> {{p.total | currency:'COP':'symbol-narrow':'1.0-0'}} </td>
-                </ng-container>
+                    <!-- Columna Total -->
+                    <ng-container matColumnDef="total">
+                        <th mat-header-cell *matHeaderCellDef class="bg-slate-100 py-4 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 text-right"> Total </th>
+                        <td mat-cell *matCellDef="let p" class="py-4 px-6 border-b border-slate-100 text-right"> 
+                            <span class="font-mono font-medium text-slate-700">{{p.total | currency:'COP':'symbol-narrow':'1.0-0'}}</span>
+                        </td>
+                    </ng-container>
 
-                <!-- Columna Estado -->
-                <ng-container matColumnDef="estado">
-                    <th mat-header-cell *matHeaderCellDef class="p-4 text-center"> Estado </th>
-                    <td mat-cell *matCellDef="let p" class="p-4 text-center">
-                        <mat-form-field appearance="fill" class="w-40 text-xs">
-                            <mat-select [value]="p.estado" (selectionChange)="onEstadoChange(p, $event.value)" 
-                                        [panelClass]="{
-                                            'bg-yellow-100': p.estado === EstadoPedido.PENDIENTE,
-                                            'bg-blue-100': p.estado === EstadoPedido.ENVIADO,
-                                            'bg-green-100': p.estado === EstadoPedido.ENTREGADO,
-                                            'bg-red-100': p.estado === EstadoPedido.CANCELADO
-                                        }">
-                                <mat-option *ngFor="let estado of estadosPedido" [value]="estado">
-                                    {{ estado }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </td>
-                </ng-container>
+                    <!-- Columna Estado -->
+                    <ng-container matColumnDef="estado">
+                        <th mat-header-cell *matHeaderCellDef class="bg-slate-100 py-4 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200 text-center"> Estado </th>
+                        <td mat-cell *matCellDef="let p" class="py-4 px-6 border-b border-slate-100 text-center">
+                             <app-ui-badge [variant]="getStatusVariant(p.estado)">
+                                {{ p.estado }}
+                             </app-ui-badge>
+                        </td>
+                    </ng-container>
 
-                <!-- Columna Acciones -->
-                <ng-container matColumnDef="acciones">
-                    <th mat-header-cell *matHeaderCellDef></th>
-                    <td mat-cell *matCellDef="let p" class="p-4">
-                        <button mat-icon-button color="primary" (click)="verDetalle(p.id)" title="Ver Detalle del Pedido">
-                            <mat-icon>visibility</mat-icon>
-                        </button>
-                        <button mat-icon-button color="warn" (click)="eliminarPedido(p.id!)" title="Eliminar Pedido" [disabled]="p.estado === EstadoPedido.ENTREGADO">
-                            <mat-icon>delete_forever</mat-icon>
-                        </button>
-                    </td>
-                </ng-container>
+                    <!-- Columna Acciones -->
+                    <ng-container matColumnDef="acciones">
+                        <th mat-header-cell *matHeaderCellDef class="bg-slate-100 py-4 px-6 border-b border-slate-200"></th>
+                        <td mat-cell *matCellDef="let p" class="py-4 px-6 border-b border-slate-100 text-right">
+                            <div class="flex items-center justify-end gap-2 text-slate-400">
+                                 <app-ui-button variant="ghost" size="sm" (click)="verDetalle(p.id)" title="Ver Detalle">
+                                    <mat-icon class="!w-4 !h-4 !text-[16px]">visibility</mat-icon>
+                                </app-ui-button>
+                                <app-ui-button variant="ghost" size="sm" (click)="eliminarPedido(p.id!)" title="Eliminar" [disabled]="p.estado === EstadoPedido.ENTREGADO">
+                                    <mat-icon class="!w-4 !h-4 !text-[16px] text-red-400">delete</mat-icon>
+                                </app-ui-button>
+                            </div>
+                        </td>
+                    </ng-container>
 
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-        </div>
-
-        <!-- VISTA DE TARJETAS: Visible solo en pantallas pequeñas (oculto desde md hacia arriba) -->
-        <div class="block md:hidden">
-            <div *ngFor="let p of dataSource.data" class="border-b last:border-b-0">
-                <div class="p-4 space-y-2">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-bold text-lg">Pedido #{{p.id}}</p>
-                            <p class="text-sm text-slate-600">{{p.clienteNombre}}</p>
-                            <p class="text-xs text-slate-500">{{p.fecha | date:'dd/MM/yyyy h:mm a'}}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-semibold text-lg">{{p.total | currency:'COP':'symbol-narrow':'1.0-0'}}</p>
-                        </div>
-                    </div>
-                    <div class="flex justify-between items-center pt-2">
-                        <mat-form-field appearance="fill" class="w-40 text-xs">
-                             <mat-select [value]="p.estado" (selectionChange)="onEstadoChange(p, $event.value)" 
-                                        [panelClass]="{
-                                            'bg-yellow-100': p.estado === EstadoPedido.PENDIENTE,
-                                            'bg-blue-100': p.estado === EstadoPedido.ENVIADO,
-                                            'bg-green-100': p.estado === EstadoPedido.ENTREGADO,
-                                            'bg-red-100': p.estado === EstadoPedido.CANCELADO
-                                        }">
-                                <mat-option *ngFor="let estado of estadosPedido" [value]="estado">
-                                    {{ estado }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                        <div>
-                            <button mat-icon-button color="primary" (click)="verDetalle(p.id)" title="Ver Detalle del Pedido">
-                                <mat-icon>visibility</mat-icon>
-                            </button>
-                            <button mat-icon-button color="warn" (click)="eliminarPedido(p.id!)" title="Eliminar Pedido" [disabled]="p.estado === EstadoPedido.ENTREGADO">
-                                <mat-icon>delete_forever</mat-icon>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="group hover:bg-slate-50 transition-colors"></tr>
+                </table>
             </div>
-        </div>
 
-        <!-- Paginador (común para ambas vistas) -->
-        <mat-paginator [length]="totalElements"
-                       [pageSize]="pageSize"
-                       [pageSizeOptions]="[5, 10, 20]"
-                       aria-label="Seleccionar página de pedidos">
-        </mat-paginator>
+            <!-- Mobile View (Simple Card Fallback) -->
+            <div class="block md:hidden bg-slate-50 p-4 space-y-4">
+                 <div *ngFor="let p of dataSource.data" class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                             <span class="text-xs font-bold text-slate-400 uppercase">#{{p.id}}</span>
+                             <h3 class="font-bold text-slate-900">{{p.clienteNombre}}</h3>
+                             <p class="text-xs text-slate-500">{{p.fecha | date:'dd/MM/yyyy'}}</p>
+                        </div>
+                        <app-ui-badge [variant]="getStatusVariant(p.estado)">{{ p.estado }}</app-ui-badge>
+                    </div>
+                    
+                    <div class="flex justify-between items-center border-t border-slate-100 pt-3">
+                        <span class="font-mono font-medium text-slate-700">{{p.total | currency:'COP':'symbol-narrow':'1.0-0'}}</span>
+                        <div class="flex gap-2">
+                            <app-ui-button variant="ghost" size="sm" (click)="verDetalle(p.id)">
+                                <mat-icon class="!w-5 !h-5 !text-[20px]">visibility</mat-icon>
+                            </app-ui-button>
+                             <app-ui-button variant="ghost" size="sm" (click)="eliminarPedido(p.id!)">
+                                <mat-icon class="!w-5 !h-5 !text-[20px] text-red-500">delete</mat-icon>
+                            </app-ui-button>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+            <!-- Paginator -->
+            <mat-paginator [length]="totalElements"
+                           [pageSize]="pageSize"
+                           [pageSizeOptions]="[5, 10, 20]"
+                           class="border-t border-slate-200 bg-slate-50">
+            </mat-paginator>
+        </app-ui-card>
     </div>
 </div>
 

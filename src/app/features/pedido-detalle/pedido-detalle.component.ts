@@ -1,16 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
+
+// Angular Material (Icons as Lucide replacement)
+import { MatCardModule } from '@angular/material/card'; // Keeping for safety/legacy within template if needed, though mostly using UiCard
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+// Services & Models
 import { PedidoService } from '../../service/pedido.service';
 import { PedidoDetallado } from '../../model/pedido.model';
 
-// ¡Importaciones para PDF!
+// Shared UI
+import { UiCardComponent } from '../../shared/ui/ui-card/ui-card.component';
+import { UiButtonComponent } from '../../shared/ui/ui-button/ui-button.component';
+import { UiBadgeComponent } from '../../shared/ui/ui-badge/ui-badge.component';
+
+// PDF
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -19,14 +28,15 @@ import autoTable from 'jspdf-autotable';
   standalone: true,
   imports: [
     CommonModule, RouterLink, DatePipe, CurrencyPipe,
-    MatCardModule, MatListModule, MatIconModule, MatButtonModule, MatDividerModule, MatProgressSpinnerModule
+    MatCardModule, MatListModule, MatIconModule, MatButtonModule, MatDividerModule, MatProgressSpinnerModule,
+    UiCardComponent, UiButtonComponent, UiBadgeComponent
   ],
   templateUrl: './pedido-detalle.component.html',
 })
 export class PedidoDetalleComponent implements OnInit {
   pedido: PedidoDetallado | null = null;
   isLoading = true;
-  isExportingPdf = false; // Para controlar el estado de carga del botón
+  isExportingPdf = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -44,9 +54,23 @@ export class PedidoDetalleComponent implements OnInit {
     }
   }
 
-  // --- MÉTODOS PARA EXPORTAR ---
+  // --- UI Helpers ---
+  getStatusVariant(estado: string): 'default' | 'outline' | 'secondary' | 'success' | 'warning' | 'destructive' {
+    switch (estado) {
+      case 'PENDIENTE': return 'warning';
+      case 'ENVIADO': return 'secondary'; // Blue-ish equivalent
+      case 'ENTREGADO': return 'success';
+      case 'CANCELADO': return 'destructive';
+      default: return 'secondary';
+    }
+  }
 
-  // Método optimizado para cargar la imagen dinámicamente
+  getImagePath(imageName: string | undefined): string {
+    return imageName ? `assets/${imageName}` : 'assets/images/placeholder.png'; // Fallback logic
+  }
+
+  // --- MÉTODOS PARA EXPORTAR (Funcionalidad preservada) ---
+
   private async getImageAsBase64(url: string): Promise<string> {
     const response = await fetch(url);
     const blob = await response.blob();
@@ -68,11 +92,14 @@ export class PedidoDetalleComponent implements OnInit {
       const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
       const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
 
-      // === ENCABEZADO CON LOGO (CARGADO DINÁMICAMENTE) ===
-      const logoBase64 = await this.getImageAsBase64('assets/disramfor.jpg'); // Usamos la imagen JPG
-      doc.addImage(logoBase64, 'JPEG', 14, 15, 40, 15);
+      // Logo
+      try {
+          const logoBase64 = await this.getImageAsBase64('assets/disramfor.jpg');
+          doc.addImage(logoBase64, 'JPEG', 14, 15, 40, 15);
+      } catch (e) {
+          console.warn('Logo not found, skipping');
+      }
       
-      // === TÍTULO Y FECHA ===
       doc.setFontSize(20);
       doc.setFont('helvetica', 'bold');
       doc.text(`Pedido #${pedido.id}`, pageWidth - 14, 22, { align: 'right' });
@@ -80,7 +107,6 @@ export class PedidoDetalleComponent implements OnInit {
       doc.setFont('helvetica', 'normal');
       doc.text(`Fecha de Emisión: ${new Date(pedido.fecha).toLocaleDateString()}`, pageWidth - 14, 28, { align: 'right' });
 
-      // === INFORMACIÓN EN DOS COLUMNAS ===
       const col1X = 14;
       const col2X = 110;
       let currentY = 50;
@@ -93,7 +119,6 @@ export class PedidoDetalleComponent implements OnInit {
       doc.line(14, currentY + 2, pageWidth - 14, currentY + 2);
       currentY += 8;
 
-      // Contenido de las columnas
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       const clienteNombreLines = doc.splitTextToSize(`Nombre: ${pedido.clienteNombre}`, 80);
@@ -107,7 +132,6 @@ export class PedidoDetalleComponent implements OnInit {
 
       const tableStartY = currentY + clienteBlockHeight + 5;
 
-      // === TABLA DE ARTÍCULOS ===
       autoTable(doc, {
         startY: tableStartY,
         head: [['Código', 'Producto', 'Cantidad', 'Precio Unit.', 'Subtotal']],
@@ -119,7 +143,6 @@ export class PedidoDetalleComponent implements OnInit {
 
       let finalY = (doc as any).lastAutoTable.finalY + 10;
 
-      // === SECCIÓN DE TOTALES ===
       doc.setFontSize(11);
       doc.text('Subtotal:', 140, finalY, { align: 'right' });
       doc.text(this.formatCurrency(pedido.subtotal), 200, finalY, { align: 'right' });
@@ -137,7 +160,6 @@ export class PedidoDetalleComponent implements OnInit {
       doc.text('Total:', 140, finalY, { align: 'right' });
       doc.text(this.formatCurrency(pedido.total), 200, finalY, { align: 'right' });
       
-      // === PIE DE PÁGINA ===
       const footerY = pageHeight - 10;
       doc.setFontSize(8);
       doc.setTextColor(150);

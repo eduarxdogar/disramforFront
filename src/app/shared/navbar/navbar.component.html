@@ -1,35 +1,67 @@
 <!-- navbar.component.html -->
-<mat-toolbar class="bg-white/90 backdrop-blur-md border-b border-slate-200 !h-16 shadow-sm sticky top-0 z-50 px-4 md:px-8 flex justify-between items-center transition-all duration-300">
+<mat-toolbar 
+    class="!h-20 px-4 md:px-8 flex justify-between items-center transition-all duration-300 z-50 backdrop-blur-none"
+    [ngClass]="{
+        'absolute top-0 w-full bg-transparent border-none shadow-none text-white': isTransparent,
+        'sticky top-0 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm text-slate-900': !isTransparent
+    }">
   
   <!-- Left Side: Logo & Brand -->
   <div class="flex items-center gap-4 cursor-pointer group" routerLink="/">
-    <!-- Logo Icon (or Image if available) -->
-    <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
+    <!-- Logo Icon -->
+    <div 
+        class="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-105"
+        [ngClass]="{
+            'bg-white/20 backdrop-blur-md text-white ring-1 ring-white/30': isTransparent,
+            'bg-gradient-to-br from-indigo-600 to-blue-700 text-white shadow-indigo-500/20': !isTransparent
+        }">
        <mat-icon class="scale-125">settings_suggest</mat-icon>
     </div>
     
     <div class="flex flex-col leading-none">
-      <span class="text-xl font-bold text-slate-900 tracking-tight">DISRAMFOR</span>
-      <span class="text-slate-500 font-medium tracking-wide text-[10px] uppercase">Enterprise</span>
+      <span class="text-xl font-bold tracking-tight" 
+            [ngClass]="{'text-white': isTransparent, 'text-slate-900': !isTransparent}">
+         DISRAMFOR
+      </span>
+      <span class="font-medium tracking-wide text-[10px] uppercase opacity-80"
+            [ngClass]="{'text-blue-100': isTransparent, 'text-slate-500': !isTransparent}">
+         Enterprise
+      </span>
     </div>
   </div>
 
   <!-- Right Side: Desktop Menu -->
   <div class="hidden md:flex items-center gap-6">
-    <!-- Navigation Links (Example) -->
-    <nav class="flex gap-6 mr-6 border-r border-slate-200 pr-6 h-8 items-center" *ngIf="authService.isAuthenticated()">
-      <a routerLink="/clientes" routerLinkActive="text-blue-600 font-semibold bg-blue-50/50" class="text-sm font-medium text-slate-600 hover:text-blue-600 px-3 py-1.5 rounded-md transition-colors">Clientes</a>
-      <a routerLink="/pedidos" routerLinkActive="text-blue-600 font-semibold bg-blue-50/50" class="text-sm font-medium text-slate-600 hover:text-blue-600 px-3 py-1.5 rounded-md transition-colors">Pedidos</a>
+    <!-- Navigation Links -->
+    <nav class="flex gap-2 mr-6 h-8 items-center" 
+         [ngClass]="{'border-r border-white/20 pr-6': isTransparent, 'border-r border-slate-200 pr-6': !isTransparent}"
+         *ngIf="authService.isAuthenticated()">
+      
+      <!-- Links adaptation -->
+      <a routerLink="/clientes" 
+         routerLinkActive="font-semibold bg-white/10" 
+         class="text-sm font-medium px-4 py-2 rounded-full transition-all duration-200"
+         [ngClass]="{'text-white hover:bg-white/10': isTransparent, 'text-slate-600 hover:text-blue-600 hover:bg-slate-50': !isTransparent}">
+         Clientes
+      </a>
+      <a routerLink="/pedidos" 
+         routerLinkActive="font-semibold bg-white/10" 
+         class="text-sm font-medium px-4 py-2 rounded-full transition-all duration-200"
+         [ngClass]="{'text-white hover:bg-white/10': isTransparent, 'text-slate-600 hover:text-blue-600 hover:bg-slate-50': !isTransparent}">
+         Pedidos
+      </a>
     </nav>
 
     <ng-container *ngIf="authService.isAuthenticated(); else authButtons">
       <!-- Authenticated User Menu -->
       <div class="flex items-center gap-3 pl-2">
         <div class="text-right hidden lg:block">
-          <p class="text-sm font-bold text-slate-800 leading-none">Usuario</p>
-          <p class="text-xs text-slate-500">Admin</p>
+          <p class="text-sm font-bold leading-none" [ngClass]="{'text-white': isTransparent, 'text-slate-800': !isTransparent}">Usuario</p>
+          <p class="text-xs opacity-70" [ngClass]="{'text-blue-100': isTransparent, 'text-slate-500': !isTransparent}">Admin</p>
         </div>
-        <button mat-icon-button class="!border !border-slate-200 !text-slate-600 hover:!bg-slate-50 !w-10 !h-10" [matMenuTriggerFor]="userMenu">
+        <button mat-icon-button class="transition-colors" 
+                [ngClass]="{'!text-white hover:!bg-white/10': isTransparent, '!text-slate-600 hover:!bg-slate-100 !border !border-slate-200': !isTransparent}"
+                [matMenuTriggerFor]="userMenu">
           <mat-icon>person</mat-icon>
         </button>
       </div>
@@ -48,10 +80,16 @@
 
     <ng-template #authButtons>
       <div class="flex items-center gap-3">
-        <a routerLink="/login" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors px-4 py-2">
+        <!-- Login Button -->
+        <a routerLink="/login" 
+           class="text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+           [ngClass]="{'text-white hover:bg-white/10': isTransparent, 'text-slate-600 hover:text-blue-600': !isTransparent}">
           Iniciar Sesión
         </a>
-        <a routerLink="/registro" class="bg-slate-900 text-white text-sm font-medium px-5 py-2.5 rounded-full hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
+        <!-- Register Button -->
+        <a routerLink="/registro" 
+           class="text-sm font-bold px-6 py-2.5 rounded-full shadow-lg transition-transform hover:-translate-y-0.5"
+           [ngClass]="{'bg-white text-indigo-700 hover:bg-blue-50': isTransparent, 'bg-slate-900 text-white hover:bg-slate-800': !isTransparent}">
           Registrarse
         </a>
       </div>
@@ -59,40 +97,43 @@
   </div>
 
   <!-- Mobile Menu Button -->
-  <button mat-icon-button (click)="toggleMobileMenu()" class="md:hidden !text-slate-700">
+  <button mat-icon-button (click)="toggleMobileMenu()" class="md:hidden transition-colors"
+          [ngClass]="{'!text-white': isTransparent, '!text-slate-700': !isTransparent}">
     <mat-icon>menu</mat-icon>
   </button>
 
 </mat-toolbar>
 
-<!-- Mobile Menu Overlay -->
-<div *ngIf="mobileMenuOpen" class="fixed inset-0 z-40 bg-white md:hidden animate-fade-in-down flex flex-col">
-  <div class="p-4 flex justify-between items-center border-b border-slate-100">
-    <span class="font-bold text-slate-900 text-lg">Menú</span>
-    <button mat-icon-button (click)="toggleMobileMenu()">
-      <mat-icon>close</mat-icon>
-    </button>
+<!-- Mobile Menu Overlay (Always White/Clean) -->
+<div *ngIf="mobileMenuOpen" class="absolute top-full left-0 w-full z-[60] bg-white shadow-xl border-t border-slate-100 md:hidden animate-fade-in-down flex flex-col">
+  <div class="hidden">
+    <!-- Header hidden inside menu since it drops down from navbar -->
   </div>
   
-  <div class="flex flex-col p-6 gap-4">
+  <div class="flex flex-col p-6 gap-2">
      <ng-container *ngIf="authService.isAuthenticated(); else mobileAuthButtons">
-        <a routerLink="/clientes" class="text-lg font-medium text-slate-800 py-3 border-b border-slate-50" (click)="toggleMobileMenu()">Clientes</a>
-        <a routerLink="/pedidos" class="text-lg font-medium text-slate-800 py-3 border-b border-slate-50" (click)="toggleMobileMenu()">Pedidos</a>
+        <a routerLink="/clientes" class="text-lg font-medium text-slate-800 py-4 border-b border-slate-50 flex justify-between items-center" (click)="toggleMobileMenu()">
+            Clientes <mat-icon class="text-slate-300">chevron_right</mat-icon>
+        </a>
+        <a routerLink="/pedidos" class="text-lg font-medium text-slate-800 py-4 border-b border-slate-50 flex justify-between items-center" (click)="toggleMobileMenu()">
+            Pedidos <mat-icon class="text-slate-300">chevron_right</mat-icon>
+        </a>
         
-        <div class="mt-8 pt-8 border-t border-slate-100">
-           <button mat-button class="text-lg w-full text-left justify-start px-0 mb-4" routerLink="/perfil" (click)="toggleMobileMenu()">
-             <mat-icon class="mr-2">account_circle</mat-icon> Mi Perfil
-           </button>
-           <button mat-flat-button color="warn" class="w-full !py-6" (click)="logout(); toggleMobileMenu()">
+        <div class="mt-auto pt-8">
+           <button mat-flat-button color="warn" class="w-full !py-6 !rounded-xl" (click)="logout(); toggleMobileMenu()">
              Cerrar Sesión
            </button>
         </div>
      </ng-container>
 
      <ng-template #mobileAuthButtons>
-        <div class="space-y-4 mt-8">
-           <a routerLink="/login" mat-stroked-button class="w-full !py-6 text-lg !border-slate-300" (click)="toggleMobileMenu()">Iniciar Sesión</a>
-           <a routerLink="/registro" mat-flat-button class="w-full !py-6 text-lg !bg-slate-900 !text-white" (click)="toggleMobileMenu()">Registrarse</a>
+        <div class="space-y-4 mt-4">
+           <a routerLink="/login" mat-stroked-button class="w-full !py-6 text-lg !border-slate-300 !text-slate-700 !rounded-xl" (click)="toggleMobileMenu()">
+             Iniciar Sesión
+           </a>
+           <a routerLink="/registro" mat-flat-button class="w-full !py-6 text-lg !bg-slate-900 !text-white !rounded-xl" (click)="toggleMobileMenu()">
+             Registrarse
+           </a>
         </div>
      </ng-template>
   </div>

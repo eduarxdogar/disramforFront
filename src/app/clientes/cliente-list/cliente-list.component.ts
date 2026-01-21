@@ -31,6 +31,7 @@ import { Cliente, Page } from '../../model/cliente.model';
     MatSnackBarModule,
   ],
   templateUrl: './cliente-list.component.html',
+  styleUrl: './cliente-list.component.css'
 })
 export class ClienteListComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['nombre', 'nit', 'direccion', 'ciudad', 'telefono', 'acciones'];
@@ -56,7 +57,6 @@ export class ClienteListComponent implements OnInit, AfterViewInit {
   }
 
   cargarClientes(): void {
-    // --- CORRECCIÓN AQUÍ ---
     // Cambiamos 'getClientes' por el nuevo método 'listarClientes'
     this.clienteService.listarClientes(this.pageIndex, this.pageSize, this.term)
       .subscribe((data: Page<Cliente>) => {
