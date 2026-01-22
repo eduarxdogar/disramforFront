@@ -13,6 +13,9 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { UiButtonComponent } from '../../shared/ui/ui-button/ui-button.component';
 import { UiCardComponent } from '../../shared/ui/ui-card/ui-card.component';
 import { UiBadgeComponent } from '../../shared/ui/ui-badge/ui-badge.component';
+import { UiConfirmDialogComponent } from '../../shared/ui/ui-confirm-dialog/ui-confirm-dialog.component';
+import { ClienteFormComponent } from '../cliente-form/cliente-form.component';
+import { MatDialog } from '@angular/material/dialog';
 
 import { ClienteService } from '../../service/cliente.service';
 import { Cliente, Page } from '../../model/cliente.model';
@@ -35,7 +38,9 @@ import { Cliente, Page } from '../../model/cliente.model';
     MatSnackBarModule,
     UiButtonComponent,
     UiCardComponent,
+    UiCardComponent,
     UiBadgeComponent,
+    ClienteFormComponent
   ],
   templateUrl: './cliente-list.component.html',
   styleUrl: './cliente-list.component.css'
@@ -47,12 +52,17 @@ export class ClienteListComponent implements OnInit, AfterViewInit {
   pageSize = 10;
   pageIndex = 0;
   term = '';
+  
+  // Sheet State
+  showSheet = false;
+  selectedClientId: number | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
     private clienteService: ClienteService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -80,24 +90,45 @@ export class ClienteListComponent implements OnInit, AfterViewInit {
   }
 
   eliminar(id: number): void {
-    const snackBarRef = this.snackBar.open(
-      `¿Estás seguro de que quieres eliminar este cliente?`,
-      'Confirmar',
-      { duration: 5000 }
-    );
-
-    snackBarRef.onAction().subscribe(() => {
-      this.clienteService.eliminarCliente(id).subscribe({
-        next: () => {
-          this.snackBar.open('Cliente eliminado con éxito.', 'Cerrar', { duration: 3000 });
-          this.cargarClientes();
-        },
-        error: (err) => {
-          this.snackBar.open('Error al eliminar el cliente.', 'Cerrar', { duration: 3000 });
-          console.error(err);
-        }
-      });
+    const dialogRef = this.dialog.open(UiConfirmDialogComponent, {
+      data: {
+        title: 'Eliminar Cliente',
+        message: '¿Estás seguro de que quieres eliminar este cliente? Esta acción no se puede deshacer.',
+        confirmText: 'Eliminar',
+        isDestructive: true
+      }
     });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.clienteService.eliminarCliente(id).subscribe({
+          next: () => {
+            this.snackBar.open('Cliente eliminado con éxito.', 'Cerrar', { duration: 3000 });
+            this.cargarClientes();
+          },
+          error: (err) => {
+            this.snackBar.open('Error al eliminar el cliente.', 'Cerrar', { duration: 3000 });
+            console.error(err);
+          }
+        });
+      }
+    });
+  }
+
+  // Sheet Logic
+  openSheet(id: number | null): void {
+    this.selectedClientId = id;
+    this.showSheet = true;
+  }
+
+  closeSheet(): void {
+    this.showSheet = false;
+    this.selectedClientId = null;
+  }
+
+  handleSuccess(): void {
+    this.closeSheet();
+    this.cargarClientes();
   }
 
   onFiltrar(): void {

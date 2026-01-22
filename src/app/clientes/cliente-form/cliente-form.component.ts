@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, numberAttribute, inject } from '@angular/core';
+import { Component, OnInit, Input, numberAttribute, inject, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -33,15 +33,21 @@ import { CommonModule } from '@angular/common';
   styleUrl: './cliente-form.component.css'
 })
 export class ClienteFormComponent implements OnInit {
-  // Dependencies using inject()
   private fb = inject(FormBuilder);
   private svc = inject(ClienteService);
   private authService = inject(AuthService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
 
-  // Router Input Binding
+  // Router Input Binding (Standard)s
   @Input({ transform: numberAttribute }) id?: number;
+
+  // Sheet Mode Inputs/Outputs
+  @Input() clientId: number | null = null;
+  @Input() isSheetMode = false;
+  
+  @Output() onCancel = new EventEmitter<void>();
+  @Output() onSuccess = new EventEmitter<void>();
 
   form: FormGroup;
   isEdit = false;
@@ -55,8 +61,6 @@ export class ClienteFormComponent implements OnInit {
       ciudad: [''],
       telefono: [''],
       email: ['', [Validators.email]],
-      // Mantenemos el campo oculto si es necesario para lógica interna, 
-      // aunque idealmente esto vendría del modelo si se usa.
       asesorId: [''] 
     });
   }
@@ -64,10 +68,14 @@ export class ClienteFormComponent implements OnInit {
   ngOnInit() {
     this.userRole = this.authService.getUserRole();
     
-    // Si tenemos ID gracias al Router Input binding
-    if (this.id) {
+    // Prioritize Sheet Input (clientId) -> Router Input (id)
+    const targetId = this.clientId || this.id;
+
+    if (targetId) {
       this.isEdit = true;
-      this.svc.getCliente(this.id).subscribe(c => this.form.patchValue(c));
+      // If using Sheet Mode, we might want to ensure 'id' property mirrors clientId for consistency logic
+      this.id = targetId; 
+      this.svc.getCliente(targetId).subscribe(c => this.form.patchValue(c));
     }
   }
 
@@ -97,15 +105,19 @@ export class ClienteFormComponent implements OnInit {
       ciudad: dto.ciudad,
       telefono: dto.telefono,
       email: dto.email,
-      asesorId: dto.asesorId // Pasamos asesorId si existe en el formulario (admin case)
+      asesorId: dto.asesorId 
     };
 
-    // Delegamos la lógica "sucia" de roles al servicio (Smart Service)
     this.svc.saveCliente(clienteRequest, this.userRole, this.id).subscribe({
       next: () => {
         const successMessage = this.isEdit ? 'Cliente actualizado correctamente.' : 'Cliente creado correctamente.';
         this.snackBar.open(successMessage, 'OK', { duration: 3000 });
-        this.router.navigate(['/clientes']);
+        
+        if (this.isSheetMode) {
+            this.onSuccess.emit();
+        } else {
+            this.router.navigate(['/clientes']);
+        }
       },
       error: (err) => {
         const errorMessage = err.error?.message || 'Ocurrió un error al guardar el cliente.';
@@ -122,10 +134,18 @@ export class ClienteFormComponent implements OnInit {
       });
 
       snackBarRef.onAction().subscribe(() => {
-        this.router.navigate(['/clientes']);
+        this.handleCancelAction();
       });
     } else {
-      this.router.navigate(['/clientes']);
+      this.handleCancelAction();
     }
+  }
+
+  private handleCancelAction() {
+      if (this.isSheetMode) {
+          this.onCancel.emit();
+      } else {
+          this.router.navigate(['/clientes']);
+      }
   }
 }

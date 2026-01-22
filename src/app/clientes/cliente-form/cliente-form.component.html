@@ -1,39 +1,45 @@
 <!-- cliente-form.component.html -->
-<div class="min-h-screen flex items-center justify-center p-6 bg-slate-900">
-  <div class="w-full max-w-2xl relative">
-    <!-- Decorative Blurs -->
-    <div
+<div [class]="isSheetMode ? 'h-full flex flex-col bg-slate-900 border-none relative' : 'min-h-screen flex items-center justify-center p-6 bg-slate-900'">
+  <div [class]="isSheetMode ? 'flex-1 w-full relative' : 'w-full max-w-2xl relative'">
+    <!-- Decorative Blurs (Only for Standard Mode or reduced for Sheet) -->
+    <div *ngIf="!isSheetMode"
       class="absolute -top-10 -left-10 w-40 h-40 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"
     ></div>
-    <div
+    <div *ngIf="!isSheetMode"
       class="absolute -top-10 -right-10 w-40 h-40 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"
     ></div>
 
     <div
-      class="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-indigo-500/10 overflow-hidden"
+      [class]="isSheetMode ? 'h-full flex flex-col bg-transparent' : 'relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-indigo-500/10 overflow-hidden'"
     >
       <!-- Header -->
-      <div class="px-8 py-6 border-b border-white/5 flex items-center gap-3">
-        <div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
-          <mat-icon>{{ isEdit ? "edit_note" : "person_add" }}</mat-icon>
-        </div>
-        <div>
-          <h2 class="text-xl font-bold text-white tracking-tight">
-            {{ isEdit ? "Editar Cliente" : "Nuevo Cliente" }}
-          </h2>
-          <p class="text-slate-400 text-sm">
-            {{
-              isEdit
-                ? "Actualiza la información del cliente"
-                : "Registra un nuevo cliente en el sistema"
-            }}
-          </p>
-        </div>
+      <div class="px-8 py-6 border-b border-white/5 flex items-center justify-between gap-3 shrink-0">
+         <div class="flex items-center gap-3">
+            <div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
+              <mat-icon>{{ isEdit ? "edit_note" : "person_add" }}</mat-icon>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-white tracking-tight">
+                {{ isEdit ? "Editar Cliente" : "Nuevo Cliente" }}
+              </h2>
+              <p class="text-slate-400 text-sm hidden sm:block">
+                {{
+                  isEdit
+                    ? "Actualiza la información"
+                    : "Registra un nuevo cliente"
+                }}
+              </p>
+            </div>
+         </div>
+         <!-- Mobile/Sheet Close Button -->
+         <button *ngIf="isSheetMode" (click)="cancel()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/5 transition-colors">
+            <mat-icon>close</mat-icon>
+         </button>
       </div>
 
-      <div class="p-8">
+      <div [class]="isSheetMode ? 'flex-1 overflow-y-auto p-6 pb-24' : 'p-8'">
         <form [formGroup]="form" (ngSubmit)="save()" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 gap-6">
             <!-- NIT -->
             <div class="group relative z-0 w-full mb-2">
               <input
@@ -42,18 +48,10 @@
                 class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-slate-600 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer"
                 placeholder=" "
               />
-              <label
-                class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-              >
+              <label class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                 NIT *
               </label>
-              <p
-                *ngIf="
-                  form.get('nit')?.hasError('required') &&
-                  form.get('nit')?.touched
-                "
-                class="mt-1 text-xs text-red-400"
-              >
+              <p *ngIf="form.get('nit')?.hasError('required') && form.get('nit')?.touched" class="mt-1 text-xs text-red-400">
                 El NIT es obligatorio
               </p>
             </div>
@@ -66,18 +64,10 @@
                 class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-slate-600 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer"
                 placeholder=" "
               />
-              <label
-                class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-              >
+              <label class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                 Nombre / Razón Social *
               </label>
-              <p
-                *ngIf="
-                  form.get('nombre')?.hasError('required') &&
-                  form.get('nombre')?.touched
-                "
-                class="mt-1 text-xs text-red-400"
-              >
+              <p *ngIf="form.get('nombre')?.hasError('required') && form.get('nombre')?.touched" class="mt-1 text-xs text-red-400">
                 El nombre es obligatorio
               </p>
             </div>
@@ -90,9 +80,7 @@
                 class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-slate-600 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer"
                 placeholder=" "
               />
-              <label
-                class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-              >
+              <label class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                 Teléfono
               </label>
             </div>
@@ -105,20 +93,9 @@
                 class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-slate-600 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer"
                 placeholder=" "
               />
-              <label
-                class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-              >
+              <label class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                 Email
               </label>
-              <p
-                *ngIf="
-                  form.get('email')?.hasError('email') &&
-                  form.get('email')?.touched
-                "
-                class="mt-1 text-xs text-red-400"
-              >
-                Email inválido
-              </p>
             </div>
 
             <!-- Ciudad -->
@@ -129,9 +106,7 @@
                 class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-slate-600 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer"
                 placeholder=" "
               />
-              <label
-                class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-              >
+              <label class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                 Ciudad
               </label>
             </div>
@@ -144,16 +119,14 @@
                 class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-slate-600 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer"
                 placeholder=" "
               />
-              <label
-                class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-              >
+              <label class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                 Dirección
               </label>
             </div>
           </div>
 
-          <!-- Botones -->
-          <div class="flex justify-end gap-4 pt-4 border-t border-white/5">
+          <!-- Botones (Standard Mode) -->
+          <div *ngIf="!isSheetMode" class="flex justify-end gap-4 pt-4 border-t border-white/5">
             <button
               type="button"
               (click)="cancel()"
@@ -171,6 +144,17 @@
           </div>
         </form>
       </div>
+
+       <!-- Sticky Footer (Sheet Mode) -->
+       <div *ngIf="isSheetMode" class="absolute bottom-0 left-0 w-full p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-3 z-30">
+          <button (click)="cancel()" class="flex-1 py-3 text-slate-300 font-medium hover:text-white transition-colors">
+              Cancelar
+          </button>
+          <button (click)="save()" [disabled]="form.invalid" class="flex-[2] py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-900/40 hover:bg-indigo-500 active:scale-95 transition-all disabled:opacity-50 disabled:bg-slate-700">
+             {{ isEdit ? "Actualizar" : "Guardar" }}
+          </button>
+       </div>
+
     </div>
   </div>
 </div>

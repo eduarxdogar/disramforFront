@@ -8,7 +8,7 @@
         <h1 class="text-3xl font-bold text-white tracking-tight">Clientes</h1>
         <p class="text-slate-400 mt-1">Gestiona la base de datos de tus clientes</p>
       </div>
-      <app-ui-button routerLink="/clientes/new" variant="primary" class="shadow-lg shadow-indigo-900/20">
+      <app-ui-button (click)="openSheet(null)" variant="primary" class="shadow-lg shadow-indigo-900/20">
         <mat-icon class="!w-5 !h-5 !text-[20px] mr-2">add</mat-icon>
         <span>Nuevo Cliente</span>
       </app-ui-button>
@@ -82,7 +82,7 @@
             <th mat-header-cell *matHeaderCellDef class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider py-3 px-6 border-b border-slate-200 text-right"> </th>
             <td mat-cell *matCellDef="let c" class="py-4 px-6 border-b border-slate-100 text-right">
               <div class="flex justify-end gap-1">
-                <app-ui-button [routerLink]="['/clientes/edit', c.id]" variant="ghost" size="sm" matTooltip="Editar">
+                <app-ui-button (click)="openSheet(c.id)" variant="ghost" size="sm" matTooltip="Editar">
                   <mat-icon class="!w-5 !h-5 !text-[20px]">edit</mat-icon>
                 </app-ui-button>
                 <app-ui-button (click)="eliminar(c.id!)" variant="ghost" size="sm" matTooltip="Eliminar">
@@ -124,7 +124,7 @@
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
-             <app-ui-button [routerLink]="['/clientes/edit', cliente.id]" variant="secondary" size="sm">
+             <app-ui-button (click)="openSheet(cliente.id || null)" variant="secondary" size="sm">
                 Editar
              </app-ui-button>
              <app-ui-button (click)="eliminar(cliente.id!)" variant="secondary" size="sm" class="text-red-700 bg-red-50">
@@ -145,5 +145,17 @@
     </app-ui-card>
 
   </div>
+
+  <!-- Side Sheet Overlay & Panel -->
+  <div *ngIf="showSheet" class="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" (click)="closeSheet()"></div>
+  <div *ngIf="showSheet" class="fixed inset-y-0 right-0 w-full max-w-md bg-slate-900 shadow-2xl z-50 flex flex-col border-l border-white/10 animate-slide-in-right">
+      <app-cliente-form 
+          [clientId]="selectedClientId" 
+          [isSheetMode]="true" 
+          (onCancel)="closeSheet()" 
+          (onSuccess)="handleSuccess()">
+      </app-cliente-form>
+  </div>
+
 </div>
 

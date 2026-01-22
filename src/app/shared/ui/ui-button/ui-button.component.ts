@@ -30,7 +30,7 @@ export class UiButtonComponent {
 
     switch (this.variant) {
       case 'primary':
-        variantClasses = 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-light)] focus:ring-[var(--color-primary)]';
+        variantClasses = 'bg-slate-900 text-white hover:bg-slate-800 focus:ring-slate-900 shadow-lg shadow-slate-900/20';
         break;
       case 'secondary':
         variantClasses = 'bg-slate-200 text-slate-900 hover:bg-slate-300 focus:ring-slate-500';
