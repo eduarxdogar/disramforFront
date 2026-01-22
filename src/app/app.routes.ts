@@ -6,6 +6,7 @@ import { PedidoDetalleComponent } from './features/pedido-detalle/pedido-detalle
 import { CentroPedidosComponent } from './features/centro-pedidos/centro-pedidos.component';
 import { LoginComponent } from './components/auth/login/login.component';
 import { RegisterComponent } from './components/auth/register/register.component';
+import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 
 
 
@@ -14,17 +15,26 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
 
-  // Rutas de Clientes (protegidas en el futuro)
-  { path: 'clientes', component: ClienteListComponent },
-  { path: 'clientes/new', component: ClienteFormComponent },
-  { path: 'clientes/edit/:id', component: ClienteFormComponent },
+  // Layout Principal para rutas autenticadas
+  {
+    path: '',
+    component: MainLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'pedidos', pathMatch: 'full' }, // Redirect root to pedidos or dashboard
+      
+      // Rutas de Clientes
+      { path: 'clientes', component: ClienteListComponent },
+      { path: 'clientes/new', component: ClienteFormComponent },
+      { path: 'clientes/edit/:id', component: ClienteFormComponent },
 
-  // Rutas de Pedidos (protegidas en el futuro)
-  { path: 'nuevo-pedido', component: CentroPedidosComponent },
-  { path: 'pedidos', component: PedidoListComponent },
-  { path: 'pedidos/detalle/:id', component: PedidoDetalleComponent },
+      // Rutas de Pedidos
+      { path: 'nuevo-pedido', component: CentroPedidosComponent },
+      { path: 'pedidos', component: PedidoListComponent },
+      { path: 'pedidos/detalle/:id', component: PedidoDetalleComponent },
+    ]
+  },
 
-  // Redirección por defecto a la ruta de login
+  // Redirección por defecto
   { path: '**', redirectTo: 'login' }
 ];
 

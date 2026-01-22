@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 // --- Servicios y Modelos ---
 import { PedidoService } from '../../service/pedido.service';
@@ -22,6 +23,7 @@ import { EstadoPedido } from '../../model/estado-pedido.model';
 import { UiCardComponent } from '../../shared/ui/ui-card/ui-card.component';
 import { UiButtonComponent } from '../../shared/ui/ui-button/ui-button.component';
 import { UiBadgeComponent } from '../../shared/ui/ui-badge/ui-badge.component';
+import { UiConfirmDialogComponent } from '../../shared/ui/ui-confirm-dialog/ui-confirm-dialog.component';
 
 @Component({
   selector: 'app-pedido-list',
@@ -29,7 +31,7 @@ import { UiBadgeComponent } from '../../shared/ui/ui-badge/ui-badge.component';
   imports: [
     CommonModule, RouterModule, HttpClientModule, DatePipe, CurrencyPipe,
     MatTableModule, MatPaginatorModule, MatIconModule, MatButtonModule, MatSnackBarModule,
-    MatSelectModule, MatFormFieldModule,
+    MatSelectModule, MatFormFieldModule, MatDialogModule,
     UiCardComponent, UiButtonComponent, UiBadgeComponent
   ],
   templateUrl: './pedido-list.component.html',
@@ -51,6 +53,7 @@ export class PedidoListComponent implements AfterViewInit {
   private pedidoService = inject(PedidoService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
 
   ngAfterViewInit() {
     this.paginator.page.subscribe(() => this.cargarPedidos());
@@ -73,20 +76,30 @@ export class PedidoListComponent implements AfterViewInit {
   }
 
   eliminarPedido(pedidoId: number) {
-    // ... existing logic
-    const confirmacion = confirm(`¿Estás seguro de que quieres eliminar el pedido #${pedidoId}? Esta acción no se puede deshacer.`);
-    if (confirmacion) {
-      this.pedidoService.eliminar(pedidoId).subscribe({
-        next: () => {
-          this.snackBar.open(`Pedido #${pedidoId} eliminado con éxito.`, 'Cerrar', { duration: 3000 });
-          this.cargarPedidos();
-        },
-        error: (err) => {
-          this.snackBar.open('Error al eliminar el pedido.', 'Cerrar', { duration: 3000 });
-          console.error(err);
-        }
-      });
-    }
+    const dialogRef = this.dialog.open(UiConfirmDialogComponent, {
+      panelClass: 'custom-dialog-container', // Optional: defining a class if needed in global styles but utilizing inline styles in component
+      data: {
+        title: 'Eliminar Pedido',
+        message: `¿Estás seguro de que deseas eliminar el pedido #${pedidoId}? Esta acción no se puede deshacer.`,
+        confirmText: 'Eliminar',
+        isDestructive: true
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.pedidoService.eliminar(pedidoId).subscribe({
+          next: () => {
+            this.snackBar.open(`Pedido #${pedidoId} eliminado con éxito.`, 'Cerrar', { duration: 3000 });
+            this.cargarPedidos();
+          },
+          error: (err) => {
+            this.snackBar.open('Error al eliminar el pedido.', 'Cerrar', { duration: 3000 });
+            console.error(err);
+          }
+        });
+      }
+    });
   }
 
   onEstadoChange(pedido: PedidoResumen, nuevoEstado: EstadoPedido): void {

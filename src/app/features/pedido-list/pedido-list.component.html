@@ -99,9 +99,8 @@
                 </table>
             </div>
 
-            <!-- Mobile View (Simple Card Fallback) -->
             <div class="block md:hidden bg-slate-50 p-4 space-y-4">
-                 <div *ngFor="let p of dataSource.data" class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                 <app-ui-card *ngFor="let p of dataSource.data" class="block shadow-sm border border-slate-200">
                     <div class="flex justify-between items-start mb-3">
                         <div>
                              <span class="text-xs font-bold text-slate-400 uppercase">#{{p.id}}</span>
@@ -122,7 +121,7 @@
                             </app-ui-button>
                         </div>
                     </div>
-                 </div>
+                 </app-ui-card>
             </div>
 
             <!-- Paginator -->

@@ -8,11 +8,10 @@
         <h1 class="text-3xl font-bold text-white tracking-tight">Clientes</h1>
         <p class="text-slate-400 mt-1">Gestiona la base de datos de tus clientes</p>
       </div>
-      <button routerLink="/clientes/new" 
-              class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-lg shadow-indigo-900/20 transition-all">
-        <mat-icon class="!w-5 !h-5 !text-[20px]">add</mat-icon>
+      <app-ui-button routerLink="/clientes/new" variant="primary" class="shadow-lg shadow-indigo-900/20">
+        <mat-icon class="!w-5 !h-5 !text-[20px] mr-2">add</mat-icon>
         <span>Nuevo Cliente</span>
-      </button>
+      </app-ui-button>
     </div>
   </div>
 
@@ -28,7 +27,7 @@
     </div>
 
     <!-- Data Container -->
-    <div class="bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden">
+    <app-ui-card class="block overflow-hidden shadow-xl border border-slate-200">
       
       <!-- Desktop Table -->
       <div class="hidden md:block overflow-x-auto">
@@ -66,9 +65,9 @@
           <ng-container matColumnDef="ciudad">
             <th mat-header-cell *matHeaderCellDef class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider py-3 px-6 border-b border-slate-200"> Ciudad </th>
             <td mat-cell *matCellDef="let c" class="py-4 px-6 border-b border-slate-100"> 
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+              <app-ui-badge variant="secondary">
                 {{c.ciudad}}
-              </span>
+              </app-ui-badge>
             </td>
           </ng-container>
 
@@ -83,16 +82,12 @@
             <th mat-header-cell *matHeaderCellDef class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider py-3 px-6 border-b border-slate-200 text-right"> </th>
             <td mat-cell *matCellDef="let c" class="py-4 px-6 border-b border-slate-100 text-right">
               <div class="flex justify-end gap-1">
-                <button [routerLink]="['/clientes/edit', c.id]" 
-                        class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                        matTooltip="Editar">
+                <app-ui-button [routerLink]="['/clientes/edit', c.id]" variant="ghost" size="sm" matTooltip="Editar">
                   <mat-icon class="!w-5 !h-5 !text-[20px]">edit</mat-icon>
-                </button>
-                <button (click)="eliminar(c.id!)" 
-                        class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        matTooltip="Eliminar">
-                  <mat-icon class="!w-5 !h-5 !text-[20px]">delete</mat-icon>
-                </button>
+                </app-ui-button>
+                <app-ui-button (click)="eliminar(c.id!)" variant="ghost" size="sm" matTooltip="Eliminar">
+                  <mat-icon class="!w-5 !h-5 !text-[20px] text-red-600">delete</mat-icon>
+                </app-ui-button>
               </div>
             </td>
           </ng-container>
@@ -104,7 +99,7 @@
 
       <!-- Mobile Grid (Cards) -->
       <div class="block md:hidden bg-slate-50 p-4 space-y-4">
-        <div *ngFor="let cliente of dataSource.data" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <app-ui-card *ngFor="let cliente of dataSource.data" class="block shadow-sm border border-slate-200">
           <div class="flex justify-between items-start mb-3">
              <div class="flex gap-3">
                 <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
@@ -129,14 +124,14 @@
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
-             <button [routerLink]="['/clientes/edit', cliente.id]" class="flex items-center px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 rounded-lg">
+             <app-ui-button [routerLink]="['/clientes/edit', cliente.id]" variant="secondary" size="sm">
                 Editar
-             </button>
-             <button (click)="eliminar(cliente.id!)" class="flex items-center px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 rounded-lg">
+             </app-ui-button>
+             <app-ui-button (click)="eliminar(cliente.id!)" variant="secondary" size="sm" class="text-red-700 bg-red-50">
                 Eliminar
-             </button>
+             </app-ui-button>
           </div>
-        </div>
+        </app-ui-card>
       </div>
 
       <!-- Shared Paginator -->
@@ -147,7 +142,7 @@
                      class="border-t border-slate-200">
       </mat-paginator>
 
-    </div>
+    </app-ui-card>
 
   </div>
 </div>

@@ -10,6 +10,9 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { UiButtonComponent } from '../../shared/ui/ui-button/ui-button.component';
+import { UiCardComponent } from '../../shared/ui/ui-card/ui-card.component';
+import { UiBadgeComponent } from '../../shared/ui/ui-badge/ui-badge.component';
 
 import { ClienteService } from '../../service/cliente.service';
 import { Cliente, Page } from '../../model/cliente.model';
@@ -28,7 +31,11 @@ import { Cliente, Page } from '../../model/cliente.model';
     MatButtonModule,
     MatIconModule,
     MatPaginatorModule,
+    MatPaginatorModule,
     MatSnackBarModule,
+    UiButtonComponent,
+    UiCardComponent,
+    UiBadgeComponent,
   ],
   templateUrl: './cliente-list.component.html',
   styleUrl: './cliente-list.component.css'

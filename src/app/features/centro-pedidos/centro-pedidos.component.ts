@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 // Shared UI
 import { UiButtonComponent } from '../../shared/ui/ui-button/ui-button.component';
@@ -71,6 +71,8 @@ export class CentroPedidosComponent implements OnInit {
   
   // Mobile Responsiveness
   showMobileFilters = false;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
     private route: ActivatedRoute, 
@@ -179,15 +181,23 @@ export class CentroPedidosComponent implements OnInit {
   }
 
   cancelarPedido(): void {
-    if (confirm('¿Estás seguro de que deseas cancelar el pedido actual? Se perderán los productos seleccionados.')) {
-        this.limpiarPedido();
-        this.selectedClient = null;
-        this.clienteControl.setValue('');
-        this.snackBar.open('Pedido cancelado y carrito limpio.', 'OK', { duration: 3000 });
-        if (this.isEditMode) {
-          this.router.navigate(['/pedidos']);
-        }
+    // Soft Delete Pattern
+    const backupPedido = [...this.pedidoActual];
+    this.limpiarPedido();
+    if (!this.isEditMode) {
+      this.selectedClient = null;
+      this.clienteControl.setValue('');
     }
+
+    const snackBarRef = this.snackBar.open('Pedido limpiado', 'DESHACER', {
+      duration: 5000,
+    });
+
+    snackBarRef.onAction().subscribe(() => {
+      this.pedidoActual = backupPedido;
+      // Note: Client restoration might be needed if complex, but simple version restores items
+      this.snackBar.open('Pedido restaurado', 'OK', { duration: 2000 });
+    });
   }
 
   cargarPedidoParaEditar(id: number): void {
@@ -240,6 +250,13 @@ export class CentroPedidosComponent implements OnInit {
       .subscribe((pagina: PageProducto<Producto>) => { 
         this.productos = pagina.content;
         this.totalElements = pagina.totalElements;
+        setTimeout(() => {
+          if (this.paginator) {
+            this.paginator.length = this.totalElements;
+            this.paginator.pageSize = this.pageSize;
+            this.paginator.pageIndex = this.pageIndex;
+          }
+        });
       });
   }
 
