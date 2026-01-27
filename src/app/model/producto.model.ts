@@ -7,6 +7,7 @@ export interface Producto {
   nombre: string;
   precioUnitario: number;
   imagenUrl?: string; // Opcional, para la ruta 'assets/images/...'
+  descripcion?: string; // Added field
 }
 
 export interface Page<T> {

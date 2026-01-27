@@ -14,7 +14,6 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
 
 // Shared UI
 import { UiButtonComponent } from '../../shared/ui/ui-button/ui-button.component';
-import { UiCardComponent } from '../../shared/ui/ui-card/ui-card.component';
 import { UiBadgeComponent } from '../../shared/ui/ui-badge/ui-badge.component';
 
 // Services & Models
@@ -24,9 +23,12 @@ import { PedidoService } from '../../service/pedido.service';
 import { ClienteService } from '../../service/cliente.service';
 import { AuthService } from '../../service/auth.service'; 
 import { Producto, Page as PageProducto } from '../../model/producto.model';
-import { Categoria } from '../../model/categoria.model';
 import { ArticuloPedido, PedidoRequest } from '../../model/pedido.model';
 import { Cliente } from '../../model/cliente.model';
+import { SearchCriteria, AutoPartDTO } from '../../model/catalog.model';
+import { CascadeSearchComponent } from './components/cascade-search/cascade-search.component';
+import { ProductCardComponent } from './components/product-card/product-card.component';
+import { CatalogService } from '../../service/catalog.service';
 
 @Component({
   selector: 'app-centro-pedidos',
@@ -40,8 +42,9 @@ import { Cliente } from '../../model/cliente.model';
     MatProgressSpinnerModule,
     MatPaginatorModule,
     UiButtonComponent,
-    UiCardComponent,
-    UiBadgeComponent
+    UiBadgeComponent,
+    CascadeSearchComponent,
+    ProductCardComponent
   ],
   templateUrl: './centro-pedidos.component.html',
 })
@@ -62,8 +65,13 @@ export class CentroPedidosComponent implements OnInit {
   pageSizeOptions = [8, 12, 24, 48];
   
   pedidoActual: ArticuloPedido[] = [];
-  categorias: Categoria[] = [];
-  filterForm: FormGroup;
+  // categorias removed
+  
+  // Search State
+  currentFilters: Partial<SearchCriteria> = {};
+
+  // Additional Search Term Control
+
 
   isEditMode = false;
   pedidoIdParaEditar: number | null = null;
@@ -77,19 +85,15 @@ export class CentroPedidosComponent implements OnInit {
   constructor(
     private route: ActivatedRoute, 
     private router: Router,
+    private catalogService: CatalogService,
     private productoService: ProductoService,
-    private categoriaService: CategoriaService,
+    // categoriaService removed
     private pedidoService: PedidoService,
     private clienteService: ClienteService,
-    private fb: FormBuilder,
+    // fb removed (or kept if needed for other things, but filterForm is gone)
     private snackBar: MatSnackBar,
     private authService: AuthService 
-  ) {
-    this.filterForm = this.fb.group({
-      termino: [''],
-      categoriaId: [null]
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     const userInfo = this.authService.getUserInfoFromToken();
@@ -98,7 +102,7 @@ export class CentroPedidosComponent implements OnInit {
 
     this.canSearchClients = this.userRole === 'ADMIN' || this.userRole === 'ASESOR';
 
-    this.cargarCategorias();
+    // Initial Load (Optional: maybe wait for search? but let's load all or none)
     this.buscarProductos();
 
     if (this.canSearchClients) {
@@ -113,14 +117,8 @@ export class CentroPedidosComponent implements OnInit {
         this.cargarPedidoParaEditar(this.pedidoIdParaEditar);
       }
     });
-    
-    this.filterForm.valueChanges.pipe(
-      debounceTime(400),
-      distinctUntilChanged()
-    ).subscribe(() => {
-      this.pageIndex = 0;
-      this.buscarProductos();
-    });
+
+    // Listen to text search changes removed - Handled by CascadeSearchComponent
   }
 
   toggleMobileFilters(): void {
@@ -181,7 +179,6 @@ export class CentroPedidosComponent implements OnInit {
   }
 
   cancelarPedido(): void {
-    // Soft Delete Pattern
     const backupPedido = [...this.pedidoActual];
     this.limpiarPedido();
     if (!this.isEditMode) {
@@ -195,7 +192,6 @@ export class CentroPedidosComponent implements OnInit {
 
     snackBarRef.onAction().subscribe(() => {
       this.pedidoActual = backupPedido;
-      // Note: Client restoration might be needed if complex, but simple version restores items
       this.snackBar.open('Pedido restaurado', 'OK', { duration: 2000 });
     });
   }
@@ -237,18 +233,32 @@ export class CentroPedidosComponent implements OnInit {
     this.clienteControl.setValue('');
     this.limpiarPedido();
   }
-  
-  cargarCategorias(): void {
-    this.categoriaService.getCategorias().subscribe((data: Categoria[]) => {
-      this.categorias = data;
-    });
+
+  // New method for Cascade Search
+  onFilterChange(filters: SearchCriteria): void {
+    this.currentFilters = { ...this.currentFilters, ...filters };
+    this.pageIndex = 0;
+    this.buscarProductos();
   }
 
   buscarProductos(): void {
-    const filtros = this.filterForm.value;
-    this.productoService.buscarProductos(filtros, this.pageIndex, this.pageSize)
-      .subscribe((pagina: PageProducto<Producto>) => { 
-        this.productos = pagina.content;
+    this.catalogService.searchParts(this.currentFilters, this.pageIndex, this.pageSize)
+      .subscribe((pagina) => { 
+        // TAREA 1: Debugging Inmediato (Espía)
+        if (pagina.content && pagina.content.length > 0) {
+          console.log('DATA CRUDA RECIBIDA:', pagina.content[0]);
+        }
+
+        // Map AutoPartDTO to Producto for compatibility
+        this.productos = pagina.content.map(part => ({
+          // Fix: Fallback for different backend DTO field names
+          // TAREA 2: Mapeo Exhaustivo (Fix)
+          codigo: (part as any).codigo || (part as any).id || (part as any).partNumber || (part as any).part_number || part.internalCode || 'ERR-CODIGO',
+          nombre: part.name,
+          precioUnitario: part.price,
+          imagenUrl: part.imageUrl,
+          descripcion: part.description || part.name // Fallback to name if description is empty
+        }));
         this.totalElements = pagina.totalElements;
         setTimeout(() => {
           if (this.paginator) {
@@ -269,6 +279,29 @@ export class CentroPedidosComponent implements OnInit {
   comprobarCantidad(producto: Producto): number {
     const item = this.pedidoActual.find(p => p.codigo === producto.codigo);
     return item ? item.cantidad : 0;
+  }
+
+  // New Handler for ProductCardComponent
+  handleQuantityChange(event: { product: Producto, quantity: number }): void {
+     const { product, quantity } = event;
+     const itemIndex = this.pedidoActual.findIndex(p => p.codigo === product.codigo);
+     
+     if (quantity > 0) {
+       if (itemIndex > -1) {
+         // Update existing
+         this.pedidoActual[itemIndex].cantidad = quantity;
+         this.pedidoActual = [...this.pedidoActual]; // Trigger change detection
+       } else {
+         // Add new
+         this.pedidoActual.push({ ...product, cantidad: quantity });
+         this.pedidoActual = [...this.pedidoActual];
+       }
+     } else {
+       // Remove if quantity is 0
+       if (itemIndex > -1) {
+         this.eliminarDelPedido(product.codigo);
+       }
+     }
   }
 
   agregarAlPedido(producto: Producto): void {

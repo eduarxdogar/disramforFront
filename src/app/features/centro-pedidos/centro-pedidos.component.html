@@ -77,29 +77,8 @@
       </section>
 
       <!-- Filters -->
-      <section [formGroup]="filterForm" class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">Buscar Producto</label>
-          <input 
-            formControlName="termino" 
-            type="text" 
-            placeholder="Código o nombre..." 
-            class="w-full bg-slate-800 text-white rounded-lg border-slate-700 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent placeholder-slate-500 py-2.5 px-4 text-sm"
-          >
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">Categoría</label>
-          <select 
-            formControlName="categoriaId" 
-            class="w-full bg-slate-800 text-white rounded-lg border-slate-700 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent py-2.5 px-4 text-sm appearance-none"
-          >
-            <option [ngValue]="null">Todas las Categorías</option>
-            <option *ngFor="let cat of categorias" [value]="cat.id">
-              {{ cat.nombre }}
-            </option>
-          </select>
-        </div>
+      <section class="space-y-6">
+        <app-cascade-search (filterChange)="onFilterChange($event)"></app-cascade-search>
       </section>
       
     </div>
@@ -158,46 +137,12 @@
     <!-- Grid -->
     <div *ngIf="!isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
       <ng-container *ngFor="let producto of productos">
-        <app-ui-card 
-          [image]="'assets/' + producto.imagenUrl"
-          [alt]="producto.nombre"
-          class="flex flex-col h-full bg-white transition-all hover:shadow-lg duration-200 group">
-          
-          <!-- Price Badge -->
-          <app-ui-badge card-badge variant="secondary" class="font-mono shadow-sm opacity-90 group-hover:opacity-100">
-            {{ producto.precioUnitario | currency }}
-          </app-ui-badge>
-
-          <div class="flex flex-col gap-2 h-full">
-            <div class="flex-1">
-               <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{{ producto.codigo }}</p>
-               <h3 class="font-semibold text-slate-900 leading-snug mb-2 line-clamp-2 min-h-[2.5rem]" title="{{ producto.nombre }}">
-                 {{ producto.nombre }}
-               </h3>
-            </div>
-
-            <div class="mt-auto pt-3 border-t border-slate-50 flex items-center justify-between gap-2">
-               <!-- Quantity Logic -->
-               <ng-container *ngIf="comprobarCantidad(producto) > 0">
-                   <div class="flex items-center gap-2 w-full justify-between">
-                       <button (click)="quitarDelPedido(producto)" class="w-8 h-8 flex items-center justify-center bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors shadow-sm">
-                         <mat-icon class="!w-4 !h-4 !text-[16px]">remove</mat-icon>
-                       </button>
-                       <span class="text-sm font-bold text-slate-900 min-w-[20px] text-center">{{ comprobarCantidad(producto) }}</span>
-                       <button (click)="agregarAlPedido(producto)" class="w-8 h-8 flex items-center justify-center bg-slate-900 text-white hover:bg-slate-800 rounded-md transition-colors shadow-sm">
-                         <mat-icon class="!w-4 !h-4 !text-[16px]">add</mat-icon>
-                       </button>
-                   </div>
-               </ng-container>
-
-               <div *ngIf="comprobarCantidad(producto) === 0" class="w-full">
-                 <app-ui-button variant="primary" size="sm" [fullWidth]="true" (click)="agregarAlPedido(producto)">
-                   Agregar
-                 </app-ui-button>
-               </div>
-            </div>
-          </div>
-        </app-ui-card>
+        <app-product-card 
+           [product]="producto"
+           [initialQuantity]="comprobarCantidad(producto)"
+           (quantityChange)="handleQuantityChange($event)"
+           class="h-full block">
+        </app-product-card>
       </ng-container>
     </div>
     
