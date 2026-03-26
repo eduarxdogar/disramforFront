@@ -7,7 +7,9 @@ import { AuthenticationRequest } from '../model/authentication-request.model';
 import { AuthenticationResponse } from '../model/authentication-response.model';
 import { jwtDecode } from 'jwt-decode';
 
-const API_URL = 'http://localhost:8080/api/auth';
+import { environment } from '../../environments/environment';
+
+const API_URL = `${environment.apiUrl}/auth`;
 const TOKEN_KEY = 'jwt_token';
 
 @Injectable({

@@ -9,12 +9,9 @@ import { environment } from '../../environments/environment';
 })
 export class CatalogService {
   private http = inject(HttpClient);
-  
-  // CORRECTION: environment.apiUrl includes '/clientes', but Catalog endpoints are at root '/api'
-  // converting 'http://localhost:8080/api/clientes' -> 'http://localhost:8080/api'
-  private baseUrl = environment.apiUrl.replace('/clientes', ''); 
+  private baseUrl = environment.apiUrl; 
 
-  // Cache para filtros (listas de strings)
+  // ... Cache para filtros (listas de strings)
   private cacheSize = 1;
 
   // 1. Get Types -> GET /filters/types
@@ -69,5 +66,19 @@ export class CatalogService {
     addParam('term', criteria.term);
 
      return this.http.get<Page<AutoPartDTO>>(`${this.baseUrl}/autoparts`, { params });
+  }
+
+  /**
+   * ADAPTADOR: Convierte el DTO del backend a nuestro modelo interno de Producto.
+   * Centraliza la lógica de "fallback" para nombres de campos inconsistentes.
+   */
+  mapToProducto(part: any): any {
+    return {
+      codigo: part.codigo || part.id || part.partNumber || part.internalCode || 'ERR-CODIGO',
+      nombre: part.name || part.nombre,
+      precioUnitario: part.price || part.precioUnitario || 0,
+      imagenUrl: part.imageUrl || part.imagenUrl,
+      descripcion: part.description || part.descripcion || part.name
+    };
   }
 }

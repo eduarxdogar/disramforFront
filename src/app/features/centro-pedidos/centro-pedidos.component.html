@@ -94,20 +94,20 @@
     <div class="hidden lg:block p-4 bg-slate-900 border-t border-slate-800">
       <div class="flex justify-between items-center mb-4">
         <span class="text-sm text-slate-400">Total Pedido</span>
-        <span class="text-xl font-bold text-white">{{ getSubtotal() | currency }}</span>
+        <span class="text-xl font-bold text-white">{{ cartService.subtotal() | currency }}</span>
       </div>
       <div class="flex gap-2">
          <app-ui-button 
            variant="secondary"
            class="flex-1 text-white border-white hover:text-white/80"
            (click)="cancelarPedido()"
-           [disabled]="!selectedClient || pedidoActual.length === 0 || isLoading">
+           [disabled]="!selectedClient || cartService.items().length === 0 || isLoading">
            Cancelar
          </app-ui-button>
          <app-ui-button 
             variant="primary" 
             class="flex-1"
-            [disabled]="!selectedClient || pedidoActual.length === 0 || isLoading"
+            [disabled]="!selectedClient || cartService.items().length === 0 || isLoading"
             (click)="finalizarPedido()">
             <span *ngIf="!isLoading">{{ isEditMode ? 'Actualizar' : 'Confirmar' }}</span>
             <mat-spinner *ngIf="isLoading" diameter="20" class="mx-auto"></mat-spinner>
@@ -139,7 +139,7 @@
       <ng-container *ngFor="let producto of productos">
         <app-product-card 
            [product]="producto"
-           [initialQuantity]="comprobarCantidad(producto)"
+           [initialQuantity]="cartService.obtenerCantidad(producto.codigo)"
            (quantityChange)="handleQuantityChange($event)"
            class="h-full block">
         </app-product-card>
@@ -173,13 +173,13 @@
       <div class="flex flex-col gap-3">
           <div class="flex justify-between items-center text-white">
               <span class="text-sm text-slate-400">Total Estimado</span>
-              <span class="text-xl font-bold">{{ getSubtotal() | currency }}</span>
+              <span class="text-xl font-bold">{{ cartService.subtotal() | currency }}</span>
           </div>
           <div class="flex gap-2 h-10">
-               <button (click)="cancelarPedido()" [disabled]="pedidoActual.length === 0" class="flex-1 rounded-md border border-red-500 text-red-500 bg-transparent font-medium text-sm hover:bg-red-900/20 disabled:opacity-50">
+               <button (click)="cancelarPedido()" [disabled]="cartService.items().length === 0" class="flex-1 rounded-md border border-red-500 text-red-500 bg-transparent font-medium text-sm hover:bg-red-900/20 disabled:opacity-50">
                    Cancelar
                </button>
-               <button (click)="finalizarPedido()" [disabled]="!selectedClient || pedidoActual.length === 0 || isLoading" class="flex-[2] rounded-md bg-indigo-600 text-white font-bold text-sm shadow-lg hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-700">
+               <button (click)="finalizarPedido()" [disabled]="!selectedClient || cartService.items().length === 0 || isLoading" class="flex-[2] rounded-md bg-indigo-600 text-white font-bold text-sm shadow-lg hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-700">
                    <ng-container *ngIf="!isLoading; else loadingIcon">
                        {{ isEditMode ? 'Actualizar' : 'Confirmar' }}
                    </ng-container>

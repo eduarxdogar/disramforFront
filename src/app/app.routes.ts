@@ -7,6 +7,7 @@ import { CentroPedidosComponent } from './features/centro-pedidos/centro-pedidos
 import { LoginComponent } from './components/auth/login/login.component';
 import { RegisterComponent } from './components/auth/register/register.component';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
+import { authGuard } from './core/guards/auth.guard';
 
 
 
@@ -19,6 +20,7 @@ export const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'pedidos', pathMatch: 'full' }, // Redirect root to pedidos or dashboard
       
