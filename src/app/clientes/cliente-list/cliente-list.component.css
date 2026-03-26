@@ -1,0 +1,16 @@
+@media (max-width: 600px) {
+    .mat-mdc-paginator-container {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+    }
+    
+    .mat-mdc-paginator-range-label {
+        margin: 10px 0 !important;
+        width: 100%;
+        text-align: center;
+    }
+
+    .mat-mdc-paginator-page-size {
+        display: none !important;
+    }
+}

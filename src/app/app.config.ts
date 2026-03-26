@@ -1,22 +1,19 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthInterceptor } from './service/interceptors/auth.interceptor'; // <-- Ajuste de la ruta
-
-
+import { ApplicationConfig } from '@angular/core';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 
-export const appConfig: ApplicationConfig = {
-  providers: [provideZoneChangeDetection({ eventCoalescing: true }),
-      provideRouter(routes),
-      provideHttpClient(withInterceptorsFromDi()),
+import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
+import { authInterceptor } from './service/interceptors/auth.interceptor';
 
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true
-    }
-    
-    
-    ]
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideRouter(routes, withComponentInputBinding()),
+
+    // --- CONFIGURACIÓN CORRECTA Y COMPLETA DEL INTERCEPTOR ---
+    // 1. Provee el sistema HttpClient de Angular con interceptores funcionales
+    provideHttpClient(
+      withInterceptors([authInterceptor]),
+      withInterceptorsFromDi() // Mantenemos soporte para interceptores legacy si alguna librería lo requiere
+    ), 
+  ]
 };

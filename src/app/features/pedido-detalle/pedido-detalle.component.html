@@ -1,95 +1,185 @@
-<div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-    <div *ngIf="isLoading" class="text-center p-8">
-        <mat-spinner diameter="50" class="mx-auto"></mat-spinner>
-        <p class="mt-4 text-slate-500">Cargando detalles del pedido...</p>
+<!-- src/app/features/pedido-detalle/pedido-detalle.component.html -->
+<div *ngIf="isLoading" class="min-h-screen flex items-center justify-center bg-[var(--bg-body)]">
+    <div class="flex flex-col items-center gap-4">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p class="text-slate-500 font-medium animate-pulse">Cargando detalles del pedido...</p>
+    </div>
+</div>
+
+<div *ngIf="!isLoading && pedido" class="min-h-screen bg-[var(--bg-body)] pb-12">
+    
+    <!-- Hero Header -->
+    <div class="bg-slate-900 pt-8 pb-32 px-4 sm:px-6 lg:px-8 shadow-lg">
+        <div class="max-w-7xl mx-auto">
+            <!-- Top Bar Actions -->
+            <div class="flex justify-between items-center mb-8">
+                <app-ui-button variant="ghost" routerLink="/pedidos" class="text-slate-300 hover:text-white hover:bg-slate-800">
+                    <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">arrow_back</mat-icon>
+                    Volver a la Lista
+                </app-ui-button>
+
+                <!-- Order Actions -->
+                <div class="flex flex-wrap gap-2">
+                    <app-ui-button variant="outline" (click)="exportarPDFCliente()" class="!border-slate-600 !text-slate-200 hover:!bg-slate-800 hover:!border-slate-500">
+                        <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">print</mat-icon>
+                        PDF Cliente
+                    </app-ui-button>
+                     <app-ui-button variant="outline" (click)="exportarPDFBodega()" class="!border-slate-600 !text-slate-200 hover:!bg-slate-800 hover:!border-slate-500">
+                        <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">inventory_2</mat-icon>
+                        PDF Bodega
+                    </app-ui-button>
+                    <app-ui-button variant="primary" (click)="editarPedido()" [disabled]="pedido.estado !== 'PENDIENTE'">
+                        <mat-icon class="mr-2 !w-5 !h-5 !text-[20px]">edit</mat-icon>
+                        Editar Pedido
+                    </app-ui-button>
+                </div>
+            </div>
+
+            <!-- Title Section -->
+            <div class="flex flex-col sm:flex-row justify-between items-end gap-4">
+                <div>
+                     <h1 class="text-4xl font-bold text-white tracking-tight leading-tight">Pedido #{{ pedido.id }}</h1>
+                     <p class="text-slate-400 mt-2 flex items-center gap-2">
+                        <mat-icon class="!w-4 !h-4 !text-[16px]">calendar_today</mat-icon>
+                        {{ pedido.fecha | date:'fullDate' | titlecase }} · {{ pedido.fecha | date:'shortTime' }}
+                     </p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div *ngIf="!isLoading && pedido">
-        <div class="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-slate-800">Detalle del Pedido #{{ pedido.id }}</h1>
-                <p class="text-slate-500">Realizado el {{ pedido.fecha | date:'fullDate' }} a las {{ pedido.fecha | date:'shortTime' }}</p>
-            </div>
-            <button mat-stroked-button routerLink="/pedidos">
-                <mat-icon>arrow_back</mat-icon>
-                Volver a la Lista
-            </button>
-        </div>
-
-        <!-- Información del Cliente y Pedido -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <mat-card>
-                <mat-card-header>
-                    <mat-card-title>Información del Cliente</mat-card-title>
-                </mat-card-header>
-                <mat-card-content class="space-y-2">
-                    <p><strong>Nombre:</strong> {{ pedido.clienteNombre }}</p>
-                    <p><strong>NIT:</strong> {{ pedido.clienteNit }}</p>
-                    <p><strong>Dirección:</strong> {{ pedido.direccionEntrega }}</p>
-                    <p><strong>Ciudad:</strong> {{ pedido.ciudadEntrega }}</p>
-                </mat-card-content>
-            </mat-card>
-            <mat-card>
-                <mat-card-header>
-                    <mat-card-title>Datos del Pedido</mat-card-title>
-                </mat-card-header>
-                <mat-card-content class="space-y-2">
-                    <p><strong>Asesor:</strong> {{ pedido.asesor }}</p>
-                    <p><strong>Estado:</strong>
-                        <span class="font-semibold px-2 py-1 text-sm rounded-full" [ngClass]="{
-                            'bg-yellow-100 text-yellow-800': pedido.estado === 'PENDIENTE',
-                            'bg-blue-100 text-blue-800': pedido.estado === 'ENVIADO',
-                            'bg-green-100 text-green-800': pedido.estado === 'ENTREGADO',
-                            'bg-red-100 text-red-800': pedido.estado === 'CANCELADO'
-                        }">{{ pedido.estado }}</span>
-                    </p>
-                </mat-card-content>
-            </mat-card>
-        </div>
-
-        <!-- Lista de Productos -->
-        <mat-card>
-            <mat-card-header>
-                <mat-card-title>Artículos del Pedido</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <mat-list>
-                    <div *ngFor="let item of pedido.items">
-                        <mat-list-item class="h-auto py-2">
-                            <!-- ¡IMAGEN AÑADIDA! -->
-                            <img matListItemAvatar [src]="item.imagenUrl ? 'assets/' + item.imagenUrl : 'assets/nombre.jpeg'" alt="{{ item.productoNombre }}" class="object-contain border rounded-md">
-                            
-                            <div matListItemTitle class="font-semibold">{{ item.productoNombre }}</div>
-                            <div matListItemLine>Código: {{ item.productoCodigo }}</div>
-                            
-                            <div matListItemMeta class="flex items-center gap-6 text-sm">
-                                <span>Cant: {{ item.cantidad }}</span>
-                                <span class="w-28 text-right">{{ item.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
-                            </div>
-                        </mat-list-item>
-                        <mat-divider></mat-divider>
+    <!-- Floating Content Grid -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10 space-y-8">
+        
+        <!-- Info Cards -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Card 1: Cliente -->
+            <app-ui-card class="shadow-xl border-0 ring-1 ring-slate-900/5">
+                <div class="p-6">
+                    <div class="flex items-center gap-3 mb-4 text-slate-400">
+                        <mat-icon class="!w-5 !h-5">person</mat-icon>
+                        <h3 class="text-sm font-semibold uppercase tracking-wider">Cliente</h3>
                     </div>
-                </mat-list>
-                <div class="text-right font-bold text-2xl mt-4 p-4 bg-slate-50 rounded-lg">
-                    Total del Pedido: {{ pedido.total | currency:'COP':'symbol-narrow':'1.0-0' }}
+                    <div class="space-y-3">
+                        <p class="font-bold text-lg text-slate-800">{{ pedido.clienteNombre }}</p>
+                         <div class="flex items-start gap-2 text-sm text-slate-600">
+                            <span class="font-medium text-slate-500 min-w-[3rem]">NIT:</span>
+                            {{ pedido.clienteNit }}
+                        </div>
+                        <div class="flex items-start gap-2 text-sm text-slate-600">
+                            <span class="font-medium text-slate-500 min-w-[3rem]">Dir:</span>
+                            {{ pedido.direccionEntrega }}
+                        </div>
+                         <div class="flex items-start gap-2 text-sm text-slate-600">
+                            <span class="font-medium text-slate-500 min-w-[3rem]">Ciu:</span>
+                            {{ pedido.ciudadEntrega }}
+                        </div>
+                    </div>
                 </div>
-            </mat-card-content>
-        </mat-card>
+            </app-ui-card>
 
-        <!-- Acciones -->
-        <div class="mt-8 flex flex-wrap justify-end gap-4">
-            <button mat-stroked-button (click)="exportarPDFCliente()">
-                <mat-icon>picture_as_pdf</mat-icon>
-                PDF Cliente
-            </button>
-            <button mat-stroked-button (click)="exportarPDFBodega()">
-                <mat-icon>inventory</mat-icon>
-                PDF Bodega
-            </button>
-            <button mat-flat-button color="primary" (click)="editarPedido()" [disabled]="pedido.estado !== 'PENDIENTE'">
-                <mat-icon>edit</mat-icon>
-                Editar Pedido
-            </button>
+            <!-- Card 2: Pedido Info -->
+            <app-ui-card class="shadow-xl border-0 ring-1 ring-slate-900/5">
+                <div class="p-6">
+                    <div class="flex items-center gap-3 mb-4 text-slate-400">
+                        <mat-icon class="!w-5 !h-5">description</mat-icon>
+                        <h3 class="text-sm font-semibold uppercase tracking-wider">Detalles</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-slate-500">Asesor</span>
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold ring-2 ring-white">
+                                    {{ (pedido.asesor || '??').substring(0,2) | uppercase }}
+                                </div>
+                                <span class="font-medium text-slate-800 text-sm">{{ pedido.asesor || 'Sin Asesor' }}</span>
+                            </div>
+                        </div>
+                         <div class="flex justify-between items-center">
+                            <span class="text-sm text-slate-500">Estado</span>
+                            <app-ui-badge [variant]="getStatusVariant(pedido.estado)">{{ pedido.estado }}</app-ui-badge>
+                        </div>
+                    </div>
+                </div>
+            </app-ui-card>
+
+             <!-- Card 3: Resumen Financiero -->
+            <app-ui-card class="shadow-xl border-0 ring-1 ring-slate-900/5 bg-gradient-to-br from-white to-slate-50">
+                <div class="p-6 h-full flex flex-col justify-center">
+                    <div class="flex items-center gap-3 mb-2 text-slate-400">
+                        <mat-icon class="!w-5 !h-5">paid</mat-icon>
+                        <h3 class="text-sm font-semibold uppercase tracking-wider">Total Pedido</h3>
+                    </div>
+                    <div class="mt-2">
+                         <p class="text-4xl font-bold text-slate-800 tracking-tight">{{ pedido.total | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
+                         <p class="text-sm text-slate-500 mt-1">IVA Incluido</p>
+                    </div>
+                </div>
+            </app-ui-card>
         </div>
+
+        <!-- Items Table -->
+        <app-ui-card class="shadow-xl border-0 ring-1 ring-slate-900/5 overflow-hidden">
+             <!-- Card Header -->
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <h3 class="font-bold text-slate-800">Artículos del Pedido</h3>
+                <span class="text-sm text-slate-500">{{ pedido.items.length }} items</span>
+            </div>
+
+            <!-- List Content -->
+            <div class="divide-y divide-slate-100">
+                <div *ngFor="let item of pedido.items" class="p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-4 hover:bg-slate-50 transition-colors">
+                    
+                    <!-- Image -->
+                    <div class="w-16 h-16 bg-white rounded-lg border border-slate-200 p-2 flex-shrink-0">
+                         <img [src]="getImagePath(item.imagenUrl)" 
+                              alt="{{ item.productoNombre }}" 
+                              class="w-full h-full object-contain mix-blend-multiply"
+                              onerror="this.src='assets/images/placeholder.png'">
+                    </div>
+
+                    <!-- Details -->
+                    <div class="flex-1 text-center sm:text-left">
+                        <h4 class="font-bold text-slate-900 text-base leading-tight">{{ item.productoNombre }}</h4>
+                         <p class="text-xs font-mono text-slate-500 mt-1">COD: {{ item.productoCodigo }}</p>
+                    </div>
+
+                    <!-- Pricing Info -->
+                    <div class="flex flex-col sm:items-end gap-1 w-full sm:w-auto text-center sm:text-right">
+                         <div class="text-sm text-slate-600">
+                            {{ item.cantidad }} <span class="text-slate-400 text-xs">x</span> {{ item.precioUnitario | currency:'COP':'symbol-narrow':'1.0-0' }}
+                         </div>
+                         <div class="font-bold text-slate-800 text-lg">
+                             {{ item.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}
+                         </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Footer Totals -->
+            <div class="bg-slate-50 px-6 py-6 border-t border-slate-200">
+                <div class="flex flex-col gap-2 max-w-xs ml-auto">
+                    <div class="flex justify-between text-sm text-slate-600">
+                        <span>Subtotal</span>
+                        <span>{{ pedido.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                    </div>
+                    <div *ngIf="pedido.descuento > 0" class="flex justify-between text-sm text-green-600">
+                        <span>Descuento</span>
+                        <span>-{{ pedido.descuento | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-slate-600">
+                        <span>IVA (19%)</span>
+                        <span>{{ pedido.iva | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                    </div>
+                     <div class="flex justify-between text-lg font-bold text-slate-900 border-t border-slate-200 pt-3 mt-1">
+                        <span>Total</span>
+                        <span>{{ pedido.total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                    </div>
+                </div>
+            </div>
+        </app-ui-card>
+
     </div>
 </div>

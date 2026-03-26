@@ -1,5 +1,5 @@
 // src/app/services/pedido.service.ts
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import {  PedidoRequest,PedidoDetallado } from '../model/pedido.model';
@@ -8,11 +8,12 @@ import { Page } from '../model/producto.model';
 import { EstadoPedido } from '../model/estado-pedido.model'; 
 
 
+import { environment } from '../../environments/environment';
+
 @Injectable({ providedIn: 'root' })
 export class PedidoService {
-  private base = 'http://localhost:8080/api/pedidos';
-
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
+  private base = `${environment.apiUrl}/pedidos`;
 
 
    actualizarPedido(id: number, pedido: PedidoRequest): Observable<any> {

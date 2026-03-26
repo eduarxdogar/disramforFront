@@ -1,0 +1,54 @@
+<app-ui-card 
+  [image]="product.imagenUrl ? (product.imagenUrl.startsWith('http') ? product.imagenUrl : 'assets/' + product.imagenUrl) : undefined"
+  [alt]="product.nombre"
+  class="flex flex-col h-full bg-white transition-all hover:shadow-lg duration-200 group">
+  
+  <!-- Price Badge -->
+  <app-ui-badge card-badge variant="secondary" class="font-mono shadow-sm opacity-90 group-hover:opacity-100">
+    {{ product.precioUnitario | currency }}
+  </app-ui-badge>
+
+  <div class="flex flex-col gap-2 h-full">
+    <div class="flex-1">
+       <!-- Code Badge (Task 2) -->
+       @if (product.codigo && product.codigo !== 'N/A') {
+         <span class="bg-gray-100 text-gray-600 text-xs font-mono font-bold px-2 py-1 rounded mb-2 inline-block">
+           {{ product.codigo }}
+         </span>
+       }
+       
+       <h3 class="font-semibold text-slate-900 leading-snug mb-1 line-clamp-2 min-h-[2.5rem]" title="{{ product.nombre }}">
+         {{ product.nombre }}
+       </h3>
+       
+       <!-- Description -->
+       <p class="text-xs text-slate-500 line-clamp-2 h-8 leading-tight mb-2" title="{{ product.descripcion }}">
+         {{ product.descripcion }}
+       </p>
+    </div>
+
+    <div class="mt-auto pt-3 border-t border-slate-50 flex items-center justify-between gap-2">
+       
+       <!-- Quantity Controls (If Adding) -->
+       <ng-container *ngIf="isAdding()">
+           <div class="flex items-center gap-2 w-full justify-between animate-in fade-in zoom-in duration-200">
+               <button (click)="decrement()" class="w-8 h-8 flex items-center justify-center bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors shadow-sm">
+                 <mat-icon class="!w-4 !h-4 !text-[16px]">remove</mat-icon>
+               </button>
+               <span class="text-sm font-bold text-slate-900 min-w-[20px] text-center">{{ quantity() }}</span>
+               <button (click)="increment()" class="w-8 h-8 flex items-center justify-center bg-slate-900 text-white hover:bg-slate-800 rounded-md transition-colors shadow-sm">
+                 <mat-icon class="!w-4 !h-4 !text-[16px]">add</mat-icon>
+               </button>
+           </div>
+       </ng-container>
+
+       <!-- Add Button (If Not Adding) -->
+       <div *ngIf="!isAdding()" class="w-full">
+         <app-ui-button variant="primary" size="sm" [fullWidth]="true" (click)="startAdding()">
+           Agregar
+         </app-ui-button>
+       </div>
+
+    </div>
+  </div>
+</app-ui-card>

@@ -1,0 +1,102 @@
+<div class="space-y-6">
+    
+    <!-- 0. Text Search -->
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Buscar Producto</label>
+        <div class="relative">
+            <input 
+                [formControl]="searchControl"
+                type="text" 
+                placeholder="Código o nombre..." 
+                class="w-full bg-slate-800 text-white rounded-lg border-slate-700 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent placeholder-slate-500 py-2.5 px-4 text-sm"
+            >
+            <mat-icon class="absolute right-3 top-2.5 text-slate-500 text-lg">search</mat-icon>
+        </div>
+    </div>
+
+    <!-- 1. Tipo de Producto -->
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">
+            Tipo de Producto
+            <span *ngIf="loadingTypes()" class="ml-2 text-xs text-indigo-400 animate-pulse">Cargando...</span>
+        </label>
+        <select 
+            [ngModel]="selectedType()" 
+            (ngModelChange)="updateFilter('selectedType', $event)"
+            class="w-full bg-slate-800 text-white rounded-lg border-slate-700 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent py-2.5 px-4 text-sm appearance-none"
+        >
+            <option [ngValue]="null">Todos los tipos</option>
+            <option *ngFor="let t of types()" [value]="t">
+                {{ t }}
+            </option>
+        </select>
+    </div>
+
+    <!-- 2. Marca -->
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">
+            Marca
+            <span *ngIf="loadingBrands()" class="ml-2 text-xs text-indigo-400 animate-pulse">Cargando...</span>
+        </label>
+        <select 
+            [ngModel]="selectedBrand()"
+            (ngModelChange)="updateFilter('selectedBrand', $event)"
+            [disabled]="!selectedType()"
+            class="w-full bg-slate-800 text-white rounded-lg border-slate-700 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent py-2.5 px-4 text-sm appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+            <option [ngValue]="null">Todas las marcas</option>
+            <option *ngFor="let b of brands()" [value]="b">
+                {{ b }}
+            </option>
+        </select>
+    </div>
+
+    <!-- 3. Modelo -->
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">
+            Modelo
+            <span *ngIf="loadingModels()" class="ml-2 text-xs text-indigo-400 animate-pulse">Cargando...</span>
+        </label>
+        <select 
+            [ngModel]="selectedModel()"
+            (ngModelChange)="updateFilter('selectedModel', $event)"
+            [disabled]="!selectedBrand()"
+            class="w-full bg-slate-800 text-white rounded-lg border-slate-700 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent py-2.5 px-4 text-sm appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+            <option [ngValue]="null">Todos los modelos</option>
+            <option *ngFor="let m of models()" [value]="m">
+                {{ m }}
+            </option>
+        </select>
+    </div>
+
+    <!-- 4. Motor -->
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">
+            Motor
+            <span *ngIf="loadingEngines()" class="ml-2 text-xs text-indigo-400 animate-pulse">Cargando...</span>
+        </label>
+        <select 
+            [ngModel]="selectedEngine()"
+            (ngModelChange)="updateFilter('selectedEngine', $event)"
+            [disabled]="!selectedModel()"
+            class="w-full bg-slate-800 text-white rounded-lg border-slate-700 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent py-2.5 px-4 text-sm appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+            <option [ngValue]="null">Todos los motores</option>
+            <option *ngFor="let e of engines()" [value]="e">
+                {{ e }}
+            </option>
+        </select>
+    </div>
+
+    <!-- Actions -->
+    <div class="pt-4 border-t border-slate-700 mt-4">
+        <app-ui-button 
+            variant="secondary" 
+            [fullWidth]="true" 
+            class="text-red-400 border-red-900/30 hover:bg-red-900/10 hover:text-red-300"
+            (click)="onClearFilters()">
+            LIMPIAR FILTROS
+        </app-ui-button>
+    </div>
+</div>

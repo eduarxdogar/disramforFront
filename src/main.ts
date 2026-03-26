@@ -1,12 +1,9 @@
-// src/main.ts
+
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
-import { provideHttpClient } from '@angular/common/http';
-import { appRouting } from './app/app.routes';
+import { appConfig } from './app/app.config'; // <-- 1. IMPORTA tu configuración
 
-bootstrapApplication(AppComponent, {
-  providers: [
-    provideHttpClient(),
-    ...appRouting
-  ]
-});
+// --- 2. ASEGÚRATE DE PASAR appConfig COMO SEGUNDO ARGUMENTO ---
+// bootstrapApplication le dice a Angular cómo construir y configurar tu aplicación.
+bootstrapApplication(AppComponent, appConfig) // <-- ESTA LÍNEA ES LA CLAVE
+  .catch((err) => console.error(err));

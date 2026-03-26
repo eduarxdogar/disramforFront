@@ -9,6 +9,7 @@ export interface Cliente {
   ciudad?: string;
   telefono?: string;
   email?: string;
+  asesorId?: number; // Solo para respuestas del backend
 }
 
 // Modelo para creación o actualización (POST/PUT)
@@ -20,6 +21,7 @@ export interface ClienteRequest {
   ciudad?: string;
   telefono?: string;
   email?: string;
+  asesorId?: number; // Solo para solicitudes del ADMIN
 }
 
 // Modelo de la respuesta paginada del backend

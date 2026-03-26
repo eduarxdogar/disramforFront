@@ -14,10 +14,10 @@
         <!-- Campo de Nombre de Usuario -->
         <mat-form-field  class="w-full">
           <mat-label>Nombre de Usuario</mat-label>
-          <input matInput formControlName="username" type="text" placeholder="Tu nombre de usuario">
+          <input matInput formControlName="nombreUsuario" type="text" placeholder="Tu nombre de usuario">
           <mat-icon matPrefix class="text-gray-400">person</mat-icon>
-          <mat-error *ngIf="registerForm.get('username')?.hasError('required')">El nombre es obligatorio</mat-error>
-          <mat-error *ngIf="registerForm.get('username')?.hasError('minlength')">El nombre debe tener al menos 3 caracteres</mat-error>
+          <mat-error *ngIf="registerForm.get('nombreUsuario')?.hasError('required')">El nombre es obligatorio</mat-error>
+          <mat-error *ngIf="registerForm.get('nombreUsuario')?.hasError('minlength')">El nombre debe tener al menos 3 caracteres</mat-error>
         </mat-form-field>
         
         <!-- Campo de Correo Electrónico -->

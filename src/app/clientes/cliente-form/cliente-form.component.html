@@ -1,74 +1,160 @@
 <!-- cliente-form.component.html -->
-<div class="p-6 max-w-2xl mx-auto">
-  <mat-card class="rounded-2xl shadow-lg overflow-hidden">
-    <mat-card-header class="bg-indigo-600 text-white p-4">
-      <mat-card-title class="text-xl font-semibold">
-        {{ isEdit ? 'Editar Cliente' : 'Nuevo Cliente' }}
-      </mat-card-title>
-    </mat-card-header>
+<div [class]="isSheetMode ? 'h-full flex flex-col bg-slate-900 border-none relative' : 'min-h-screen flex items-center justify-center p-6 bg-slate-900'">
+  <div [class]="isSheetMode ? 'flex-1 w-full relative' : 'w-full max-w-2xl relative'">
+    <!-- Decorative Blurs (Only for Standard Mode or reduced for Sheet) -->
+    <div *ngIf="!isSheetMode"
+      class="absolute -top-10 -left-10 w-40 h-40 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"
+    ></div>
+    <div *ngIf="!isSheetMode"
+      class="absolute -top-10 -right-10 w-40 h-40 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"
+    ></div>
 
-    <mat-card-content class="p-6 space-y-4">
-      <form [formGroup]="form" (ngSubmit)="save()">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- NIT -->
-          <mat-form-field appearance="fill" class="w-full">
-            <mat-label>NIT</mat-label>
-            <input matInput formControlName="nit" placeholder="Digite NIT">
-            <mat-error *ngIf="form.get('nit')?.hasError('required')">
-              El NIT es obligatorio
-            </mat-error>
-          </mat-form-field>
+    <div
+      [class]="isSheetMode ? 'h-full flex flex-col bg-transparent' : 'relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-indigo-500/10 overflow-hidden'"
+    >
+      <!-- Header -->
+      <div class="px-8 py-6 border-b border-white/5 flex items-center justify-between gap-3 shrink-0">
+         <div class="flex items-center gap-3">
+            <div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
+              <mat-icon>{{ isEdit ? "edit_note" : "person_add" }}</mat-icon>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-white tracking-tight">
+                {{ isEdit ? "Editar Cliente" : "Nuevo Cliente" }}
+              </h2>
+              <p class="text-slate-400 text-sm hidden sm:block">
+                {{
+                  isEdit
+                    ? "Actualiza la información"
+                    : "Registra un nuevo cliente"
+                }}
+              </p>
+            </div>
+         </div>
+         <!-- Mobile/Sheet Close Button -->
+         <button *ngIf="isSheetMode" (click)="cancel()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/5 transition-colors">
+            <mat-icon>close</mat-icon>
+         </button>
+      </div>
 
-          <!-- Nombre -->
-          <mat-form-field appearance="fill" class="w-full">
-            <mat-label>Nombre</mat-label>
-            <input matInput formControlName="nombre" placeholder="Razón social o nombre">
-            <mat-error *ngIf="form.get('nombre')?.hasError('required')">
-              El nombre es obligatorio
-            </mat-error>
-          </mat-form-field>
+      <div [class]="isSheetMode ? 'flex-1 overflow-y-auto p-6 pb-24' : 'p-8'">
+        <form [formGroup]="form" (ngSubmit)="save()" class="space-y-6">
+          <div class="grid grid-cols-1 gap-6">
+            <!-- NIT -->
+            <div class="group relative z-0 w-full mb-2">
+              <input
+                formControlName="nit"
+                type="text"
+                class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-slate-600 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer"
+                placeholder=" "
+              />
+              <label class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                NIT *
+              </label>
+              <p *ngIf="form.get('nit')?.hasError('required') && form.get('nit')?.touched" class="mt-1 text-xs text-red-400">
+                El NIT es obligatorio
+              </p>
+            </div>
 
-          <!-- Teléfono -->
-          <mat-form-field appearance="fill" class="w-full">
-            <mat-label>Teléfono</mat-label>
-            <input matInput formControlName="telefono" placeholder="Ej: 3001234567">
-          </mat-form-field>
+            <!-- Nombre -->
+            <div class="group relative z-0 w-full mb-2">
+              <input
+                formControlName="nombre"
+                type="text"
+                class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-slate-600 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer"
+                placeholder=" "
+              />
+              <label class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                Nombre / Razón Social *
+              </label>
+              <p *ngIf="form.get('nombre')?.hasError('required') && form.get('nombre')?.touched" class="mt-1 text-xs text-red-400">
+                El nombre es obligatorio
+              </p>
+            </div>
 
-          <!-- Email -->
-          <mat-form-field appearance="fill" class="w-full">
-            <mat-label>Email</mat-label>
-            <input matInput formControlName="email" placeholder="correo@dominio.com">
-            <mat-error *ngIf="form.get('email')?.hasError('email')">
-              Formato de email inválido
-            </mat-error>
-          </mat-form-field>
+            <!-- Teléfono -->
+            <div class="group relative z-0 w-full mb-2">
+              <input
+                formControlName="telefono"
+                type="tel"
+                class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-slate-600 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer"
+                placeholder=" "
+              />
+              <label class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                Teléfono
+              </label>
+            </div>
 
-          <!-- Ciudad -->
-          <mat-form-field appearance="fill" class="w-full">
-            <mat-label>Ciudad</mat-label>
-            <input matInput formControlName="ciudad" placeholder="Ciudad">
-          </mat-form-field>
+            <!-- Email -->
+            <div class="group relative z-0 w-full mb-2">
+              <input
+                formControlName="email"
+                type="email"
+                class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-slate-600 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer"
+                placeholder=" "
+              />
+              <label class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                Email
+              </label>
+            </div>
 
-          <!-- Dirección -->
-          <mat-form-field appearance="fill" class="w-full sm:col-span-2">
-            <mat-label>Dirección</mat-label>
-            <input matInput formControlName="direccion" placeholder="Calle 123 #45-67">
-          </mat-form-field>
-        </div>
+            <!-- Ciudad -->
+            <div class="group relative z-0 w-full mb-2">
+              <input
+                formControlName="ciudad"
+                type="text"
+                class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-slate-600 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer"
+                placeholder=" "
+              />
+              <label class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                Ciudad
+              </label>
+            </div>
 
-        <!-- Botones -->
-        <div class="mt-6 flex justify-end gap-3">
-          <!-- Botón de cancelar corregido: llama a la función `cancel()` y es de tipo `button` -->
-          <button type="button" mat-stroked-button color="warn" (click)="cancel()">
-            Cancelar
+            <!-- Dirección -->
+            <div class="group relative z-0 w-full mb-2 md:col-span-2">
+              <input
+                formControlName="direccion"
+                type="text"
+                class="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-slate-600 appearance-none focus:outline-none focus:ring-0 focus:border-indigo-500 peer"
+                placeholder=" "
+              />
+              <label class="peer-focus:font-medium absolute text-sm text-slate-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-indigo-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                Dirección
+              </label>
+            </div>
+          </div>
+
+          <!-- Botones (Standard Mode) -->
+          <div *ngIf="!isSheetMode" class="flex justify-end gap-4 pt-4 border-t border-white/5">
+            <button
+              type="button"
+              (click)="cancel()"
+              class="px-6 py-2.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all duration-200 border border-transparent hover:border-white/10"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              [disabled]="form.invalid"
+              class="px-6 py-2.5 rounded-full text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ isEdit ? "Actualizar Cliente" : "Guardar Cliente" }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+       <!-- Sticky Footer (Sheet Mode) -->
+       <div *ngIf="isSheetMode" class="absolute bottom-0 left-0 w-full p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-3 z-30">
+          <button (click)="cancel()" class="flex-1 py-3 text-slate-300 font-medium hover:text-white transition-colors">
+              Cancelar
           </button>
-          <button mat-flat-button color="primary" type="submit"
-                  [disabled]="form.invalid">
-            {{ isEdit ? 'Actualizar' : 'Crear' }}
+          <button (click)="save()" [disabled]="form.invalid" class="flex-[2] py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-900/40 hover:bg-indigo-500 active:scale-95 transition-all disabled:opacity-50 disabled:bg-slate-700">
+             {{ isEdit ? "Actualizar" : "Guardar" }}
           </button>
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+       </div>
+
+    </div>
+  </div>
 </div>
-

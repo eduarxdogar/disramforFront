@@ -5,5 +5,6 @@ export enum Rol {
   SUPERVISOR = 'SUPERVISOR',
   PIKING = 'PIKING',
   DESPACHO = 'DESPACHO',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
+  ASESOR = 'ASESOR',
 }

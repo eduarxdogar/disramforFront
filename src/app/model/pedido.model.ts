@@ -1,4 +1,5 @@
 import { Producto } from './producto.model';
+import { EstadoPedido } from './estado-pedido.model'; // Importamos el enum
 
 // Interfaz para los artículos que se muestran en el carrito del frontend
 export interface ArticuloPedido extends Producto {
@@ -6,10 +7,9 @@ export interface ArticuloPedido extends Producto {
 }
 
 // Interfaz para la petición que se ENVIARÁ al backend
-// Coincide 1:1 con tu PedidoRequestDTO.java
 export interface PedidoRequest {
   clienteId: number;
-  asesorId: number;
+  asesorId: number; // Asegúrate de que este campo se maneje correctamente
   items: {
     productoCodigo: string;
     cantidad: number;
@@ -21,7 +21,7 @@ export interface PedidoResumen {
   fecha: string;
   clienteNombre: string;
   asesorNombre: string;
-  estado: string;
+  estado: EstadoPedido; // Usamos el enum para consistencia
   total: number;
 }
 
@@ -31,10 +31,17 @@ export interface PedidoDetallado {
     fecha: string;
     clienteNombre: string;
     clienteNit: string;
-    estado: string;
+    estado: EstadoPedido; // Usamos el enum aquí también
+
+    // --- NUEVOS CAMPOS DEL BACKEND ---
+    subtotal: number;
+    descuento: number;
+    iva: number;
+    // ---------------------------------
+
     total: number;
     items: {
-imagenUrl: any;
+        imagenUrl: any;
         espacio: string;
         nivel: string;
         pasillo: string;
@@ -49,3 +56,4 @@ imagenUrl: any;
     ciudadEntrega: string;
     direccionEntrega: string;
 }
+

@@ -1,155 +1,256 @@
-// /features/centro-pedidos/centro-pedidos.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
+import { debounceTime, distinctUntilChanged, startWith, switchMap, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
-// --- Importaciones de Angular Material ---
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatTableModule } from '@angular/material/table';
+// Angular Material Imports
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-// --- Servicios y Modelos ---
-import { debounceTime, distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
-// CORRECCIÓN: Asegúrate de que las rutas a tus servicios y modelos sean correctas.
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+
+// Shared UI
+import { UiButtonComponent } from '../../shared/ui/ui-button/ui-button.component';
+import { UiBadgeComponent } from '../../shared/ui/ui-badge/ui-badge.component';
+
+// Services & Models
 import { ProductoService } from '../../service/producto.service';
-import { CategoriaService } from '../../service/categoria.service';
 import { PedidoService } from '../../service/pedido.service';
-import { Producto,Page } from '../../model/producto.model';
-import { Categoria } from '../../model/categoria.model';
-import { ArticuloPedido } from '../../model/pedido.model';
-import { PedidoRequest } from '../../model/pedido.model';
 import { ClienteService } from '../../service/cliente.service';
+import { AuthService } from '../../service/auth.service'; 
+import { CartService } from '../../service/cart.service';
+import { CatalogService } from '../../service/catalog.service';
+import { Producto } from '../../model/producto.model';
+import { PedidoRequest } from '../../model/pedido.model';
 import { Cliente } from '../../model/cliente.model';
-import { Observable } from 'rxjs';
-
-
+import { SearchCriteria } from '../../model/catalog.model';
+import { CascadeSearchComponent } from './components/cascade-search/cascade-search.component';
+import { ProductCardComponent } from './components/product-card/product-card.component';
 
 @Component({
   selector: 'app-centro-pedidos',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, HttpClientModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule,
-    MatCardModule, MatPaginatorModule, MatTableModule, MatIconModule, MatSnackBarModule ,MatAutocompleteModule
+    CommonModule, 
+    ReactiveFormsModule, 
+    MatIconModule, 
+    MatSnackBarModule, 
+    MatAutocompleteModule, 
+    MatProgressSpinnerModule,
+    MatPaginatorModule,
+    UiButtonComponent,
+    UiBadgeComponent,
+    CascadeSearchComponent,
+    ProductCardComponent
   ],
   templateUrl: './centro-pedidos.component.html',
 })
 export class CentroPedidosComponent implements OnInit {
 
-  clienteControl = new FormControl('');
-  filteredClientes$: Observable<Cliente[]> | undefined;
+  // Inyección de dependencias moderna
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  public catalogService = inject(CatalogService);
+  private pedidoService = inject(PedidoService);
+  private clienteService = inject(ClienteService);
+  private snackBar = inject(MatSnackBar);
+  private authService = inject(AuthService);
+  public cartService = inject(CartService);
+
+  userRole: string | null = null;
+  canSearchClients = false;
+  asesorInfo: { id: number | null, nombre: string | null } = { id: null, nombre: null };
+  
+  clienteControl = new FormControl<string | Cliente>('');
+  filteredClientes$?: Observable<Cliente[]>;
   selectedClient: Cliente | null = null;
+  
   productos: Producto[] = [];
   totalElements = 0;
-  pageSize = 8;
+  pageSize = 12; 
   pageIndex = 0;
-  pedidoActual: ArticuloPedido[] = [];
-  displayedColumns: string[] = ['nombre', 'cantidad', 'precioUnitario', 'total', 'acciones'];
-  categorias: Categoria[] = [];
-  filterForm: FormGroup;
-  editMode = false;
-  pedidoIdParaEditar: number | null = null;
+  pageSizeOptions = [8, 12, 24, 48];
+  
+  currentFilters: Partial<SearchCriteria> = {};
 
-  constructor(
-    private route: ActivatedRoute, 
-    private router: Router,
-    private productoService: ProductoService,
-    private categoriaService: CategoriaService,
-    private pedidoService: PedidoService,
-     private clienteService: ClienteService,
-    private fb: FormBuilder,
-    private snackBar: MatSnackBar
-  ) {
-    this.filterForm = this.fb.group({
-      termino: [''],
-      categoriaId: [null]
+  isEditMode = false;
+  pedidoIdParaEditar: number | null = null;
+  isLoading = false;
+  showMobileFilters = false;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  ngOnInit(): void {
+    const userInfo = this.authService.getUserInfoFromToken();
+    this.userRole = userInfo.rol;
+    this.asesorInfo = { id: userInfo.id, nombre: userInfo.nombre };
+
+    this.canSearchClients = this.userRole === 'ADMIN' || this.userRole === 'ASESOR';
+
+    // Carga inicial de productos
+    this.buscarProductos();
+
+    if (this.canSearchClients) {
+      this.iniciarBusquedaClientes();
+    }
+    
+    this.route.queryParams.subscribe(params => {
+      const editarId = params['editarId'];
+      if (editarId) {
+        this.isEditMode = true;
+        this.pedidoIdParaEditar = +editarId;
+        this.cargarPedidoParaEditar(this.pedidoIdParaEditar);
+      }
     });
   }
 
-  ngOnInit(): void {
-    this.cargarCategorias();
-    this.buscarProductos();
-    
-    this.filterForm.valueChanges.pipe(
-      debounceTime(400),
-      distinctUntilChanged()
-    ).subscribe(() => {
-      this.pageIndex = 0;
-      this.buscarProductos();
-    });
-       this.filteredClientes$ = this.clienteControl.valueChanges.pipe(
+  toggleMobileFilters(): void {
+    this.showMobileFilters = !this.showMobileFilters;
+  }
+
+  iniciarBusquedaClientes(): void {
+    this.filteredClientes$ = this.clienteControl.valueChanges.pipe(
       startWith(''),
       debounceTime(300),
       distinctUntilChanged(),
-      switchMap(value => this.clienteService.buscar(value || ''))
+      switchMap(value => {
+        const term = typeof value === 'string' ? value : (value?.nombre || '');
+        return this.clienteService.listarClientes(0, 10, term).pipe(
+          map(page => page.content)
+        );
+      })
     );
   }
-    displayCliente(cliente: Cliente): string {
-    return cliente && cliente.nombre ? cliente.nombre : '';
-  }
-
-  onClientSelected(event: any): void {
-    this.selectedClient = event.option.value;
-    const nombre = this.selectedClient && this.selectedClient.nombre ? this.selectedClient.nombre : null;
-    this.clienteControl.setValue(nombre, { emitEvent: false });
-  }
-
-  clearClientSelection(): void {
-      this.selectedClient = null;
-      this.clienteControl.setValue('');
-  }
-
-  // --- MÉTODO FINALIZAR PEDIDO ACTUALIZADO ---
+  
   finalizarPedido(): void {
-    // ¡Validación clave!
-    if (!this.selectedClient || this.selectedClient.id === undefined) {
-      this.snackBar.open('Debe seleccionar un cliente con un ID válido para crear el pedido.', 'Cerrar', { duration: 3000 });
-      return;
+    if (!this.selectedClient?.id) { 
+      this.snackBar.open('Por favor, selecciona un cliente.', 'Cerrar', { duration: 3000 });
+      return; 
     }
-    if (this.pedidoActual.length === 0) {
-      this.snackBar.open('El pedido no puede estar vacío.', 'Cerrar', { duration: 3000 });
+    
+    const items = this.cartService.items();
+    if (items.length === 0) { 
+      this.snackBar.open('El carrito está vacío.', 'Cerrar', { duration: 3000 });
+      return; 
+    }
+
+    const asesorIdParaEnviar = this.asesorInfo.id;
+    if (!asesorIdParaEnviar) {
+      this.snackBar.open('Error: No se pudo identificar al asesor.', 'Cerrar', { duration: 3000 });
       return;
     }
 
-    const nuevoPedido: PedidoRequest = {
-      clienteId: this.selectedClient.id, // Usamos el ID del cliente seleccionado
-      asesorId: 1, // Temporal
-      items: this.pedidoActual.map(item => ({
+    const pedidoRequest: PedidoRequest = {
+      clienteId: this.selectedClient.id,
+      asesorId: asesorIdParaEnviar,
+      items: items.map(item => ({
         productoCodigo: item.codigo,
         cantidad: item.cantidad
       }))
     };
     
-    this.pedidoService.crearPedido(nuevoPedido).subscribe({
-      next: (respuesta: any) => {
-        this.snackBar.open('¡Pedido creado exitosamente!', 'Cerrar', { duration: 3000 });
-        this.limpiarPedido();
-        this.clearClientSelection(); // Limpiamos el cliente para el siguiente pedido
+    this.isLoading = true;
+    const operation = this.isEditMode && this.pedidoIdParaEditar
+      ? this.pedidoService.actualizarPedido(this.pedidoIdParaEditar, pedidoRequest)
+      : this.pedidoService.crearPedido(pedidoRequest);
+    
+    operation.subscribe({
+      next: () => {
+        const message = this.isEditMode ? '¡Pedido actualizado!' : '¡Pedido creado!';
+        this.snackBar.open(message, 'Cerrar', { duration: 3000 });
+        this.cartService.limpiarPedido();
+        this.router.navigate(['/pedidos']);
       },
-      error: (err: any) => { /* ... tu manejo de errores ... */ }
+      error: (err) => {
+        const message = this.isEditMode ? 'Error al actualizar.' : 'Error al crear.';
+        this.snackBar.open(message, 'Cerrar', { duration: 3000 });
+      },
+      complete: () => this.isLoading = false
     });
   }
 
-  cargarCategorias(): void {
-    this.categoriaService.getCategorias().subscribe((data: Categoria[]): void => {
-      this.categorias = data;
+  cancelarPedido(): void {
+    const backupPedido = [...this.cartService.items()];
+    this.cartService.limpiarPedido();
+    if (!this.isEditMode) {
+      this.selectedClient = null;
+      this.clienteControl.setValue('');
+    }
+
+    const snackBarRef = this.snackBar.open('Pedido limpiado', 'DESHACER', {
+      duration: 5000,
     });
+
+    snackBarRef.onAction().subscribe(() => {
+      // Restauración manual si es necesario, o via CartService
+      backupPedido.forEach(item => this.cartService.actualizarCantidad(item, item.cantidad));
+      this.snackBar.open('Pedido restaurado', 'OK', { duration: 2000 });
+    });
+  }
+
+  cargarPedidoParaEditar(id: number): void {
+    this.isLoading = true;
+    this.pedidoService.getPedidoById(id).subscribe({
+      next: (pedidoDetallado) => {
+        this.clienteService.getCliente(pedidoDetallado.clienteId).subscribe(cliente => {
+          this.selectedClient = cliente;
+          this.clienteControl.setValue(cliente);
+        });
+        
+        this.cartService.limpiarPedido();
+        pedidoDetallado.items.forEach(item => {
+          this.cartService.actualizarCantidad({
+            codigo: item.productoCodigo,
+            nombre: item.productoNombre,
+            precioUnitario: item.precioUnitario,
+            descripcion: item.productoNombre, // Falta en DTO detallado a veces
+            imagenUrl: item.imagenUrl
+          }, item.cantidad);
+        });
+        
+        this.isLoading = false;
+      },
+      error: () => {
+        this.snackBar.open('Error al cargar el pedido para editar.', 'Cerrar', { duration: 3000 });
+        this.isLoading = false;
+        this.router.navigate(['/pedidos']);
+      }
+    });
+  }
+
+  displayCliente(cliente: Cliente): string {
+    return cliente && cliente.nombre ? cliente.nombre : '';
+  }
+
+  onClientSelected(event: any): void {
+    this.selectedClient = event.option.value;
+  }
+
+  clearClientSelection(): void {
+    this.selectedClient = null;
+    this.clienteControl.setValue('');
+    this.cartService.limpiarPedido();
+  }
+
+  onFilterChange(filters: SearchCriteria): void {
+    this.currentFilters = { ...this.currentFilters, ...filters };
+    this.pageIndex = 0;
+    this.buscarProductos();
   }
 
   buscarProductos(): void {
-    const filtros = this.filterForm.value;
-    this.productoService.buscarProductos(filtros, this.pageIndex, this.pageSize)
-      .subscribe((pagina: Page<Producto>) => { // <-- Tipo explícito
-        this.productos = pagina.content;
+    this.catalogService.searchParts(this.currentFilters, this.pageIndex, this.pageSize)
+      .subscribe((pagina) => { 
+        // ✅ Uso de Adaptador centralizado en CatalogService
+        this.productos = pagina.content.map(part => this.catalogService.mapToProducto(part));
         this.totalElements = pagina.totalElements;
+        
+        if (this.paginator) {
+          this.paginator.length = this.totalElements;
+        }
       });
   }
 
@@ -159,39 +260,11 @@ export class CentroPedidosComponent implements OnInit {
     this.buscarProductos();
   }
 
-  agregarAlPedido(producto: Producto): void {
-    const itemExistente = this.pedidoActual.find(item => item.codigo === producto.codigo);
-    if (itemExistente) {
-      itemExistente.cantidad++;
-    } else {
-      this.pedidoActual.push({ ...producto, cantidad: 1 });
-    }
-    this.pedidoActual = [...this.pedidoActual];
-  }
-
-  actualizarCantidad(codigo: string, event: Event): void {
-    const nuevaCantidad = parseInt((event.target as HTMLInputElement).value, 10);
-    const item = this.pedidoActual.find(item => item.codigo === codigo);
-    if (item) {
-      if (nuevaCantidad > 0) {
-        item.cantidad = nuevaCantidad;
-      } else {
-        this.eliminarDelPedido(codigo);
-      }
-      this.pedidoActual = [...this.pedidoActual];
-    }
+  handleQuantityChange(event: { product: Producto, quantity: number }): void {
+     this.cartService.actualizarCantidad(event.product, event.quantity);
   }
 
   eliminarDelPedido(codigo: string): void {
-    this.pedidoActual = this.pedidoActual.filter(item => item.codigo !== codigo);
+    this.cartService.eliminarDelPedido(codigo);
   }
-
-  limpiarPedido(): void {
-      this.pedidoActual = [];
-  }
-
-  getSubtotal(): number {
-    return this.pedidoActual.reduce((acc, item) => acc + (item.precioUnitario * item.cantidad), 0);
-  }
-  
 }

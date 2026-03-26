@@ -51,7 +51,7 @@ export class RegisterComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {
     this.registerForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
+      nombreUsuario: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       rol: ['', [Validators.required]]

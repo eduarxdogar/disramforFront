@@ -1,103 +1,161 @@
-<!--
-  He realizado los siguientes cambios:
-  1. Solucionado el error de tipo en el método `eliminar()` añadiendo el operador de aserción no nula (`!`) a `c.id` y `cliente.id`. Esto le asegura a TypeScript que el valor no será `undefined`.
--->
-<div class="p-4 md:p-6 max-w-5xl mx-auto">
-  <mat-card class="rounded-lg shadow-sm">
-    <mat-card-content class="p-4">
-      <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
-        <h2 class="text-2xl font-semibold text-slate-800">Clientes</h2>
-        <button mat-flat-button color="primary" routerLink="/clientes/new">
-          <mat-icon>add</mat-icon>
-          <span>Nuevo Cliente</span>
-        </button>
+<!-- cliente-list.component.html -->
+<div class="min-h-screen bg-[var(--bg-body)]">
+  
+  <!-- Hero Header -->
+  <div class="bg-slate-900 pt-8 pb-32 px-4 sm:px-6 lg:px-8 shadow-lg">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-white tracking-tight">Clientes</h1>
+        <p class="text-slate-400 mt-1">Gestiona la base de datos de tus clientes</p>
       </div>
+      <app-ui-button (click)="openSheet(null)" variant="primary" class="shadow-lg shadow-indigo-900/20">
+        <mat-icon class="!w-5 !h-5 !text-[20px] mr-2">add</mat-icon>
+        <span>Nuevo Cliente</span>
+      </app-ui-button>
+    </div>
+  </div>
 
-      <!-- Filtro de búsqueda -->
-      <mat-form-field class="w-full mb-4">
-        <mat-label>Buscar por nombre o NIT</mat-label>
-        <input matInput [(ngModel)]="term" (ngModelChange)="onFiltrar()" placeholder="Ej: 90123456 o Nombre Cliente">
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
+  <!-- Main Content with Overlap -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 relative z-10 pb-12">
+    
+    <!-- Search Bar -->
+    <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-2 mb-6 flex items-center max-w-2xl mx-auto sm:mx-0">
+      <mat-icon class="text-slate-400 ml-3">search</mat-icon>
+      <input [(ngModel)]="term" (ngModelChange)="onFiltrar()" 
+             class="w-full border-none focus:ring-0 text-slate-700 placeholder-slate-400 text-sm h-10"
+             placeholder="Buscar por nombre, NIT, ciudad..." />
+    </div>
 
-      <!-- Tabla para pantallas medianas y grandes (md y superior) -->
-      <div class="hidden md:block">
-        <table mat-table [dataSource]="dataSource" class="w-full">
-          <!-- Columnas de la tabla... -->
+    <!-- Data Container -->
+    <app-ui-card class="block overflow-hidden shadow-xl border border-slate-200">
+      
+      <!-- Desktop Table -->
+      <div class="hidden md:block overflow-x-auto">
+        <table mat-table [dataSource]="dataSource" class="w-full text-left">
+          
+          <!-- Nombre -->
           <ng-container matColumnDef="nombre">
-            <th mat-header-cell *matHeaderCellDef> Nombre </th>
-            <td mat-cell *matCellDef="let c"> {{c.nombre}} </td>
+            <th mat-header-cell *matHeaderCellDef class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider py-3 px-6 border-b border-slate-200"> Nombre </th>
+            <td mat-cell *matCellDef="let c" class="py-4 px-6 border-b border-slate-100">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm ring-2 ring-white">
+                  {{ (c.nombre || '').charAt(0) | uppercase }}
+                </div>
+                <div>
+                  <div class="font-medium text-slate-900">{{c.nombre}}</div>
+                  <div class="text-xs text-slate-500">{{c.email}}</div>
+                </div>
+              </div>
+            </td>
           </ng-container>
 
+          <!-- NIT -->
           <ng-container matColumnDef="nit">
-            <th mat-header-cell *matHeaderCellDef> NIT </th>
-            <td mat-cell *matCellDef="let c"> {{c.nit}} </td>
+            <th mat-header-cell *matHeaderCellDef class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider py-3 px-6 border-b border-slate-200"> NIT </th>
+            <td mat-cell *matCellDef="let c" class="py-4 px-6 text-slate-500 text-sm border-b border-slate-100 font-mono"> {{c.nit}} </td>
           </ng-container>
           
+          <!-- Dirección -->
           <ng-container matColumnDef="direccion">
-            <th mat-header-cell *matHeaderCellDef> Dirección </th>
-            <td mat-cell *matCellDef="let c"> {{c.direccion}} </td>
+            <th mat-header-cell *matHeaderCellDef class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider py-3 px-6 border-b border-slate-200"> Dirección </th>
+            <td mat-cell *matCellDef="let c" class="py-4 px-6 text-slate-500 text-sm border-b border-slate-100 truncate max-w-xs" title="{{c.direccion}}"> {{c.direccion}} </td>
           </ng-container>
 
+          <!-- Ciudad -->
           <ng-container matColumnDef="ciudad">
-            <th mat-header-cell *matHeaderCellDef> Ciudad </th>
-            <td mat-cell *matCellDef="let c"> {{c.ciudad}} </td>
+            <th mat-header-cell *matHeaderCellDef class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider py-3 px-6 border-b border-slate-200"> Ciudad </th>
+            <td mat-cell *matCellDef="let c" class="py-4 px-6 border-b border-slate-100"> 
+              <app-ui-badge variant="secondary">
+                {{c.ciudad}}
+              </app-ui-badge>
+            </td>
           </ng-container>
 
+          <!-- Teléfono -->
           <ng-container matColumnDef="telefono">
-            <th mat-header-cell *matHeaderCellDef> Teléfono </th>
-            <td mat-cell *matCellDef="let c"> {{c.telefono}} </td>
+            <th mat-header-cell *matHeaderCellDef class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider py-3 px-6 border-b border-slate-200"> Teléfono </th>
+            <td mat-cell *matCellDef="let c" class="py-4 px-6 text-slate-500 text-sm border-b border-slate-100"> {{c.telefono}} </td>
           </ng-container>
 
+          <!-- Acciones -->
           <ng-container matColumnDef="acciones">
-            <th mat-header-cell *matHeaderCellDef class="text-right">Acciones</th>
-            <td mat-cell *matCellDef="let c" class="text-right">
-              <button mat-icon-button color="accent" [routerLink]="['/clientes/edit', c.id]" [attr.aria-label]="'Editar cliente ' + c.nombre">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button color="warn" (click)="eliminar(c.id!)" [attr.aria-label]="'Eliminar cliente ' + c.nombre">
-                <mat-icon>delete</mat-icon>
-              </button>
+            <th mat-header-cell *matHeaderCellDef class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider py-3 px-6 border-b border-slate-200 text-right"> </th>
+            <td mat-cell *matCellDef="let c" class="py-4 px-6 border-b border-slate-100 text-right">
+              <div class="flex justify-end gap-1">
+                <app-ui-button (click)="openSheet(c.id)" variant="ghost" size="sm" matTooltip="Editar">
+                  <mat-icon class="!w-5 !h-5 !text-[20px]">edit</mat-icon>
+                </app-ui-button>
+                <app-ui-button (click)="eliminar(c.id!)" variant="ghost" size="sm" matTooltip="Eliminar">
+                  <mat-icon class="!w-5 !h-5 !text-[20px] text-red-600">delete</mat-icon>
+                </app-ui-button>
+              </div>
             </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="group hover:bg-slate-50 transition-colors"></tr>
         </table>
       </div>
 
-      <!-- Lista de tarjetas para pantallas pequeñas (móviles) -->
-      <div class="md:hidden space-y-3">
-        <div *ngFor="let cliente of dataSource.data" class="bg-gray-50 rounded-lg p-4 shadow">
-          <div class="flex justify-between items-start">
-            <div>
-              <p class="font-bold text-lg text-slate-800">{{ cliente.nombre }}</p>
-              <p class="text-sm text-slate-600">NIT: {{ cliente.nit }}</p>
-            </div>
-            <div>
-              <button mat-icon-button color="accent" [routerLink]="['/clientes/edit', cliente.id]" [attr.aria-label]="'Editar cliente ' + cliente.nombre">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button color="warn" (click)="eliminar(cliente.id!)" [attr.aria-label]="'Eliminar cliente ' + cliente.nombre">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
+      <!-- Mobile Grid (Cards) -->
+      <div class="block md:hidden bg-slate-50 p-4 space-y-4">
+        <app-ui-card *ngFor="let cliente of dataSource.data" class="block shadow-sm border border-slate-200">
+          <div class="flex justify-between items-start mb-3">
+             <div class="flex gap-3">
+                <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+                   {{ (cliente.nombre || '').charAt(0) | uppercase }}
+                </div>
+                <div>
+                   <h3 class="font-bold text-slate-900 leading-tight">{{ cliente.nombre }}</h3>
+                   <p class="text-xs text-slate-500 mt-0.5">NIT: {{ cliente.nit }}</p>
+                </div>
+             </div>
           </div>
-          <div class="mt-2 text-sm text-slate-500">
-            <p>{{ cliente.direccion }}, {{ cliente.ciudad }}</p>
-            <p>Tel: {{ cliente.telefono }}</p>
+          
+          <div class="space-y-2 mb-4">
+             <div class="flex items-center text-sm text-slate-600">
+                <mat-icon class="!w-4 !h-4 !text-[16px] mr-2 text-slate-400">location_on</mat-icon>
+                <span class="truncate">{{ cliente.direccion }}, {{ cliente.ciudad }}</span>
+             </div>
+             <div class="flex items-center text-sm text-slate-600">
+                <mat-icon class="!w-4 !h-4 !text-[16px] mr-2 text-slate-400">phone</mat-icon>
+                <span>{{ cliente.telefono }}</span>
+             </div>
           </div>
-        </div>
+
+          <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+             <app-ui-button (click)="openSheet(cliente.id || null)" variant="secondary" size="sm">
+                Editar
+             </app-ui-button>
+             <app-ui-button (click)="eliminar(cliente.id!)" variant="secondary" size="sm" class="text-red-700 bg-red-50">
+                Eliminar
+             </app-ui-button>
+          </div>
+        </app-ui-card>
       </div>
 
-      <!-- Paginador -->
+      <!-- Shared Paginator -->
       <mat-paginator [length]="totalElements" 
                      [pageSize]="pageSize" 
                      [pageSizeOptions]="[5, 10, 25, 100]" 
                      (page)="onPageChange($event)"
-                     aria-label="Seleccionar página de clientes">
+                     class="border-t border-slate-200">
       </mat-paginator>
-    </mat-card-content>
-  </mat-card>
+
+    </app-ui-card>
+
+  </div>
+
+  <!-- Side Sheet Overlay & Panel -->
+  <div *ngIf="showSheet" class="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" (click)="closeSheet()"></div>
+  <div *ngIf="showSheet" class="fixed inset-y-0 right-0 w-full max-w-md bg-slate-900 shadow-2xl z-50 flex flex-col border-l border-white/10 animate-slide-in-right">
+      <app-cliente-form 
+          [clientId]="selectedClientId" 
+          [isSheetMode]="true" 
+          (onCancel)="closeSheet()" 
+          (onSuccess)="handleSuccess()">
+      </app-cliente-form>
+  </div>
+
 </div>
 
